@@ -1,4 +1,4 @@
-package com.github.phantasmdragon.elementarylist.ui.activity;
+package com.github.phantasmdragon.elementarylist.activity;
 
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -9,14 +9,15 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 
+import android.view.Menu;
+import android.view.MenuItem;
+
 import com.github.phantasmdragon.elementarylist.R;
-import com.github.phantasmdragon.elementarylist.ui.fragment.CompletedTaskFragment;
-import com.github.phantasmdragon.elementarylist.ui.fragment.CurrentTaskFragment;
-import com.github.phantasmdragon.elementarylist.ui.fragment.SpecialTaskFragment;
+import com.github.phantasmdragon.elementarylist.fragment.CompletedTaskFragment;
+import com.github.phantasmdragon.elementarylist.fragment.CurrentTaskFragment;
+import com.github.phantasmdragon.elementarylist.fragment.SpecialTaskFragment;
 
 public class MainActivity extends AppCompatActivity {
 

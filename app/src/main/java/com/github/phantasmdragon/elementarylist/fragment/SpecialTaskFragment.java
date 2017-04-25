@@ -1,4 +1,4 @@
-package com.github.phantasmdragon.elementarylist.ui.fragment;
+package com.github.phantasmdragon.elementarylist.fragment;
 
 import android.support.annotation.Nullable;
 import android.os.Bundle;
