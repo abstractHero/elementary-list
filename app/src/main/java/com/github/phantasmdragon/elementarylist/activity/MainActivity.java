@@ -2,19 +2,19 @@ package com.github.phantasmdragon.elementarylist.activity;
 
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
+import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.View;
-
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 
 import com.github.phantasmdragon.elementarylist.R;
+import com.github.phantasmdragon.elementarylist.fragment.AddTaskDialogFragment;
 import com.github.phantasmdragon.elementarylist.fragment.CompletedTaskFragment;
 import com.github.phantasmdragon.elementarylist.fragment.CurrentTaskFragment;
 import com.github.phantasmdragon.elementarylist.fragment.SpecialTaskFragment;
@@ -22,7 +22,6 @@ import com.github.phantasmdragon.elementarylist.fragment.SpecialTaskFragment;
 public class MainActivity extends AppCompatActivity {
 
     private SectionsPagerAdapter mSectionsPagerAdapter;
-
     private ViewPager mViewPager;
 
     @Override
@@ -38,18 +37,24 @@ public class MainActivity extends AppCompatActivity {
         mViewPager = (ViewPager) findViewById(R.id.container);
         mViewPager.setAdapter(mSectionsPagerAdapter);
 
+        TabLayout tabLayout = (TabLayout)findViewById(R.id.tabs);
+        tabLayout.setupWithViewPager(mViewPager);
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.button_float);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+                addTaskTodo();
             }
         });
 
     }
 
+    private void addTaskTodo() {
+        AddTaskDialogFragment dialog = new AddTaskDialogFragment();
+        dialog.setCancelable(false);
+        dialog.show(getSupportFragmentManager(), "currentTask");
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
