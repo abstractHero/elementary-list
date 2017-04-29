@@ -3,6 +3,7 @@ package com.github.phantasmdragon.elementarylist.activity;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TabLayout;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
@@ -18,16 +19,29 @@ import com.github.phantasmdragon.elementarylist.fragment.AddTaskDialogFragment;
 import com.github.phantasmdragon.elementarylist.fragment.CompletedTaskFragment;
 import com.github.phantasmdragon.elementarylist.fragment.CurrentTaskFragment;
 import com.github.phantasmdragon.elementarylist.fragment.SpecialTaskFragment;
+import com.github.phantasmdragon.elementarylist.fragment.listener.AddTaskDialogListener;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements AddTaskDialogListener {
 
     private SectionsPagerAdapter mSectionsPagerAdapter;
     private ViewPager mViewPager;
+    private TabLayout tabLayout;
+
+    private CurrentTaskFragment currentTaskFragment;
+
+    @Override
+    public void onDialogPositiveClick(DialogFragment dialog, Bundle infoAboutNewTask) {
+        currentTaskFragment.addTaskToList(infoAboutNewTask);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        if (savedInstanceState != null) {
+            currentTaskFragment = (CurrentTaskFragment) getSupportFragmentManager().getFragment(savedInstanceState, "currentTaskFragment");
+        }
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -37,20 +51,27 @@ public class MainActivity extends AppCompatActivity {
         mViewPager = (ViewPager) findViewById(R.id.container);
         mViewPager.setAdapter(mSectionsPagerAdapter);
 
-        TabLayout tabLayout = (TabLayout)findViewById(R.id.tabs);
+        tabLayout = (TabLayout)findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(mViewPager);
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.button_float);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                addTaskTodo();
+                showAddDialog();
             }
         });
 
     }
 
-    private void addTaskTodo() {
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        currentTaskFragment.setRetainInstance(true);
+        getSupportFragmentManager().putFragment(outState, "currentTaskFragment", currentTaskFragment);
+    }
+
+    private void showAddDialog() {
         AddTaskDialogFragment dialog = new AddTaskDialogFragment();
         dialog.setCancelable(false);
         dialog.show(getSupportFragmentManager(), "currentTask");
@@ -89,7 +110,8 @@ public class MainActivity extends AppCompatActivity {
             if (position == 0) {
                 return CompletedTaskFragment.newInstance();
             } else if (position == 1) {
-                return CurrentTaskFragment.newInstance();
+                currentTaskFragment = CurrentTaskFragment.newInstance();
+                return currentTaskFragment;
             } else {
                 return SpecialTaskFragment.newInstance();
             }
@@ -105,11 +127,11 @@ public class MainActivity extends AppCompatActivity {
         public CharSequence getPageTitle(int position) {
             switch (position) {
                 case 0:
-                    return "SECTION 1";
+                    return "Finished";
                 case 1:
-                    return "SECTION 2";
+                    return "Current";
                 case 2:
-                    return "SECTION 3";
+                    return "Special";
             }
             return null;
         }
