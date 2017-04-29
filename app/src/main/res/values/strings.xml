@@ -1,5 +1,7 @@
 <resources>
     <string name="app_name">Elementary List</string>
     <string name="action_settings">Settings</string>
-    <string name="section_format">Hello World from section: %1$d</string>
+    <string name="dialog_title">New task</string>
+    <string name="task_enter_name">Title</string>
+    <string name="tesk_enter_description">Description (optional)</string>
 </resources>
