@@ -7,15 +7,21 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.github.phantasmdragon.elementarylist.R;
+import com.github.phantasmdragon.elementarylist.fragment.listener.OnCompletedClickListener;
+import com.github.phantasmdragon.elementarylist.fragment.listener.OnSpecialClickListener;
 import com.sackcentury.shinebuttonlib.ShineButton;
 
 import java.util.List;
 
 public class CustomRowAdapter extends RecyclerView.Adapter<CustomRowAdapter.ViewHolder> {
 
-    private List<String> mCurrentTasks;
+    private OnCompletedClickListener mCompletedListener;
+    private OnSpecialClickListener mSpecialListener;
+
+    private List<String> mFragmentTasks;
     private Context      mContext;
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
@@ -33,8 +39,10 @@ public class CustomRowAdapter extends RecyclerView.Adapter<CustomRowAdapter.View
     }
 
     public CustomRowAdapter(Context context, List<String> tasks) {
-        mCurrentTasks = tasks;
+        mFragmentTasks = tasks;
         mContext = context;
+        mCompletedListener = (OnCompletedClickListener)mContext;
+        mSpecialListener = (OnSpecialClickListener)mContext;
     }
 
     public Context getContext() {
@@ -52,14 +60,26 @@ public class CustomRowAdapter extends RecyclerView.Adapter<CustomRowAdapter.View
     }
 
     @Override
-    public void onBindViewHolder(CustomRowAdapter.ViewHolder holder, int position) {
-        String nameTask = mCurrentTasks.get(position);
+    public void onBindViewHolder(CustomRowAdapter.ViewHolder holder, final int position) {
+        String nameTask = mFragmentTasks.get(position);
 
         holder.mDescriptionTask.setText(nameTask);
+        holder.mIsTaskCompleted.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mCompletedListener.onTaskFinishClick(position);
+            }
+        });
+        holder.mIsImportantTask.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(mContext, "Clicked Shine on " + position, Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     @Override
     public int getItemCount() {
-        return mCurrentTasks.size();
+        return mFragmentTasks.size();
     }
 }
