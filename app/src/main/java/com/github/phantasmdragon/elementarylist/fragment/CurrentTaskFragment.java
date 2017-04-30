@@ -1,5 +1,7 @@
 package com.github.phantasmdragon.elementarylist.fragment;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
@@ -16,17 +18,17 @@ import com.github.phantasmdragon.elementarylist.custom.rowadapter.CustomRowAdapt
 import org.jetbrains.annotations.Contract;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Map;
 
 public class CurrentTaskFragment extends Fragment {
 
+    public static final String CURRENT_TASK = "CurrentTaskList";
+
     private CustomRowAdapter rowAdapter;
     private RecyclerView currentTaskRecycler;
+    private SharedPreferences currentTaskPregerence;
 
-    //Array List how example for demonstration. Will be deleted
-    private ArrayList<String> tasks = new ArrayList<>(Arrays.asList("11111", "22222", "33333",
-            "44444", "55555", "66666", "77777", "88888", "99999", "101010"
-            , "121212", "131313", "141414", "151515", "161616", "171717", "181818"));
+    private ArrayList<String> tasks = new ArrayList<>();
 
     @Contract(" -> !null")
     public static CurrentTaskFragment newInstance() {
@@ -34,11 +36,28 @@ public class CurrentTaskFragment extends Fragment {
     }
 
     @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setRetainInstance(true);
+    }
+
+    @Nullable
+    @Override
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_current_task, container, false);
+
+        currentTaskPregerence = getActivity().getSharedPreferences(CURRENT_TASK, Context.MODE_PRIVATE);
+        rowAdapter = new CustomRowAdapter(view.getContext(), tasks);
+
+        return view;
+    }
+
+    @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         if(savedInstanceState != null) {
             tasks = savedInstanceState.getStringArrayList("list");
-        }
+        } else loadTask();
 
         currentTaskRecycler = (RecyclerView)getActivity().findViewById(R.id.recycler_current_task);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity());
@@ -55,24 +74,25 @@ public class CurrentTaskFragment extends Fragment {
         });
     }
 
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setRetainInstance(true);
+    private void loadTask() {
+        Map<String, ?> allPreference = currentTaskPregerence.getAll();
+        for (int i = 0; i < allPreference.size(); i++) {
+            String taskName = currentTaskPregerence.getString(String.valueOf(i), null);
+            if (taskName != null) tasks.add(0, taskName);
+        }
     }
 
-    @Nullable
-    @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_current_task, container, false);
-        rowAdapter = new CustomRowAdapter(view.getContext(), tasks);
-        return view;
+    private void saveTask(String taskName) {
+        SharedPreferences.Editor editor = currentTaskPregerence.edit();
+        editor.putString(String.valueOf(tasks.size()-1), taskName);
+        editor.apply();
     }
 
     public void addTaskToList(Bundle infoAboutNewTask) {
         String taskName = infoAboutNewTask.getString("task_name");
         tasks.add(0, taskName);
-        if (rowAdapter != null) rowAdapter.notifyItemInserted(0);
+        saveTask(taskName);
+        if (rowAdapter != null) rowAdapter.notifyItemRangeChanged(0, tasks.size());
 
         currentTaskRecycler.scrollToPosition(0);
     }
