@@ -20,18 +20,35 @@ import com.github.phantasmdragon.elementarylist.fragment.CompletedTaskFragment;
 import com.github.phantasmdragon.elementarylist.fragment.CurrentTaskFragment;
 import com.github.phantasmdragon.elementarylist.fragment.SpecialTaskFragment;
 import com.github.phantasmdragon.elementarylist.fragment.listener.AddTaskDialogListener;
+import com.github.phantasmdragon.elementarylist.fragment.listener.OnCompletedClickListener;
+import com.github.phantasmdragon.elementarylist.fragment.listener.OnSpecialClickListener;
 
-public class MainActivity extends AppCompatActivity implements AddTaskDialogListener {
+public class MainActivity extends AppCompatActivity implements AddTaskDialogListener,
+                                                                OnCompletedClickListener,
+                                                                OnSpecialClickListener {
 
     private SectionsPagerAdapter mSectionsPagerAdapter;
     private ViewPager mViewPager;
     private TabLayout tabLayout;
 
     private CurrentTaskFragment currentTaskFragment;
+    private CompletedTaskFragment completedTaskFragment;
+    private SpecialTaskFragment specialTaskFragment;
 
     @Override
     public void onDialogPositiveClick(DialogFragment dialog, Bundle infoAboutNewTask) {
         currentTaskFragment.addTaskToList(infoAboutNewTask);
+    }
+
+    @Override
+    public void onTaskSpecialClick(int position) {
+
+    }
+
+    @Override
+    public void onTaskFinishClick(int position) {
+        completedTaskFragment.addTaskToList(currentTaskFragment.getCompletedTask(position));
+        currentTaskFragment.taskIsFinished(position);
     }
 
     @Override
@@ -40,7 +57,9 @@ public class MainActivity extends AppCompatActivity implements AddTaskDialogList
         setContentView(R.layout.activity_main);
 
         if (savedInstanceState != null) {
-            currentTaskFragment = (CurrentTaskFragment) getSupportFragmentManager().getFragment(savedInstanceState, "currentTaskFragment");
+            completedTaskFragment = (CompletedTaskFragment)getSupportFragmentManager().getFragment(savedInstanceState, "completedTaskFragment");
+            currentTaskFragment = (CurrentTaskFragment)getSupportFragmentManager().getFragment(savedInstanceState, "currentTaskFragment");
+            specialTaskFragment = (SpecialTaskFragment)getSupportFragmentManager().getFragment(savedInstanceState, "specialTaskFragment");
         }
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -67,14 +86,15 @@ public class MainActivity extends AppCompatActivity implements AddTaskDialogList
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        currentTaskFragment.setRetainInstance(true);
         getSupportFragmentManager().putFragment(outState, "currentTaskFragment", currentTaskFragment);
+        getSupportFragmentManager().putFragment(outState, "completedTaskFragment", completedTaskFragment);
+        getSupportFragmentManager().putFragment(outState, "specialTaskFragment", specialTaskFragment);
     }
 
     private void showAddDialog() {
         AddTaskDialogFragment dialog = new AddTaskDialogFragment();
         dialog.setCancelable(false);
-        dialog.show(getSupportFragmentManager(), "currentTask");
+        dialog.show(getSupportFragmentManager(), "addTask");
     }
 
     @Override
@@ -108,12 +128,14 @@ public class MainActivity extends AppCompatActivity implements AddTaskDialogList
         @Override
         public Fragment getItem(int position) {
             if (position == 0) {
-                return CompletedTaskFragment.newInstance();
+                completedTaskFragment = CompletedTaskFragment.newInstance();
+                return completedTaskFragment;
             } else if (position == 1) {
                 currentTaskFragment = CurrentTaskFragment.newInstance();
                 return currentTaskFragment;
             } else {
-                return SpecialTaskFragment.newInstance();
+                specialTaskFragment = SpecialTaskFragment.newInstance();
+                return specialTaskFragment;
             }
         }
 
