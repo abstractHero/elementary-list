@@ -26,7 +26,7 @@ public class CurrentTaskFragment extends Fragment {
 
     private CustomRowAdapter rowAdapter;
     private RecyclerView currentTaskRecycler;
-    private SharedPreferences currentTaskPregerence;
+    private SharedPreferences currentTaskPreference;
 
     private ArrayList<String> tasks = new ArrayList<>();
 
@@ -38,6 +38,8 @@ public class CurrentTaskFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        currentTaskPreference = getActivity().getSharedPreferences(CURRENT_TASK, Context.MODE_PRIVATE);
+        loadTask();
         setRetainInstance(true);
     }
 
@@ -46,7 +48,6 @@ public class CurrentTaskFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_current_task, container, false);
 
-        currentTaskPregerence = getActivity().getSharedPreferences(CURRENT_TASK, Context.MODE_PRIVATE);
         rowAdapter = new CustomRowAdapter(view.getContext(), tasks);
 
         return view;
@@ -56,8 +57,8 @@ public class CurrentTaskFragment extends Fragment {
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         if(savedInstanceState != null) {
-            tasks = savedInstanceState.getStringArrayList("list");
-        } else loadTask();
+            tasks = savedInstanceState.getStringArrayList("currentList");
+        }
 
         currentTaskRecycler = (RecyclerView)getActivity().findViewById(R.id.recycler_current_task);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity());
@@ -75,17 +76,23 @@ public class CurrentTaskFragment extends Fragment {
     }
 
     private void loadTask() {
-        Map<String, ?> allPreference = currentTaskPregerence.getAll();
+        Map<String, ?> allPreference = currentTaskPreference.getAll();
         for (int i = 0; i < allPreference.size(); i++) {
-            String taskName = currentTaskPregerence.getString(String.valueOf(i), null);
+            String taskName = currentTaskPreference.getString(String.valueOf(i), null);
             if (taskName != null) tasks.add(0, taskName);
         }
     }
 
     private void saveTask(String taskName) {
-        SharedPreferences.Editor editor = currentTaskPregerence.edit();
-        editor.putString(String.valueOf(tasks.size()-1), taskName);
-        editor.apply();
+        SharedPreferences.Editor saveEditor = currentTaskPreference.edit();
+        saveEditor.putString(String.valueOf(tasks.size()-1), taskName);
+        saveEditor.apply();
+    }
+
+    private void deleteTask(int position) {
+        SharedPreferences.Editor deleteEditor = currentTaskPreference.edit();
+        deleteEditor.remove(String.valueOf(position));
+        deleteEditor.apply();
     }
 
     public void addTaskToList(Bundle infoAboutNewTask) {
@@ -97,9 +104,22 @@ public class CurrentTaskFragment extends Fragment {
         currentTaskRecycler.scrollToPosition(0);
     }
 
+    public Bundle getCompletedTask(int position) {
+        Bundle infoAboutTask = new Bundle();
+        infoAboutTask.putString("completed_task_name", tasks.get(position));
+        return infoAboutTask;
+    }
+
+    public void taskIsFinished(int position) {
+        deleteTask(position);
+        tasks.remove(position);
+        rowAdapter.notifyItemRemoved(position);
+        rowAdapter.notifyItemRangeChanged(0, tasks.size());
+    }
+
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putStringArrayList("list", tasks);
+        outState.putStringArrayList("currentList", tasks);
     }
 }
