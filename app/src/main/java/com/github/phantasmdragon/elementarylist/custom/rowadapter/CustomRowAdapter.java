@@ -7,9 +7,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.github.phantasmdragon.elementarylist.R;
+import com.github.phantasmdragon.elementarylist.fragment.CompletedTaskFragment;
+import com.github.phantasmdragon.elementarylist.fragment.SpecialTaskFragment;
 import com.github.phantasmdragon.elementarylist.fragment.listener.OnCompletedClickListener;
 import com.github.phantasmdragon.elementarylist.fragment.listener.OnSpecialClickListener;
 import com.sackcentury.shinebuttonlib.ShineButton;
@@ -19,10 +20,11 @@ import java.util.List;
 public class CustomRowAdapter extends RecyclerView.Adapter<CustomRowAdapter.ViewHolder> {
 
     private OnCompletedClickListener mCompletedListener;
-    private OnSpecialClickListener mSpecialListener;
+    private OnSpecialClickListener   mSpecialListener;
 
     private List<String> mFragmentTasks;
     private Context      mContext;
+    private String       mNameFragment;
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
 
@@ -38,9 +40,10 @@ public class CustomRowAdapter extends RecyclerView.Adapter<CustomRowAdapter.View
         }
     }
 
-    public CustomRowAdapter(Context context, List<String> tasks) {
+    public CustomRowAdapter(Context context, List<String> tasks, String nameFragment) {
         mFragmentTasks = tasks;
         mContext = context;
+        mNameFragment = nameFragment;
         mCompletedListener = (OnCompletedClickListener)mContext;
         mSpecialListener = (OnSpecialClickListener)mContext;
     }
@@ -63,17 +66,23 @@ public class CustomRowAdapter extends RecyclerView.Adapter<CustomRowAdapter.View
     public void onBindViewHolder(CustomRowAdapter.ViewHolder holder, final int position) {
         String nameTask = mFragmentTasks.get(position);
 
+        if (mNameFragment.equals(CompletedTaskFragment.class.getSimpleName())) {
+            holder.mIsTaskCompleted.setChecked(true);
+            holder.mIsImportantTask.setEnabled(false);
+        }
+        if (mNameFragment.equals(SpecialTaskFragment.class.getSimpleName())) holder.mIsImportantTask.setChecked(true);
+
         holder.mDescriptionTask.setText(nameTask);
         holder.mIsTaskCompleted.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mCompletedListener.onTaskFinishClick(position);
+                mCompletedListener.onTaskFinishClick(position, mNameFragment);
             }
         });
         holder.mIsImportantTask.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(mContext, "Clicked Shine on " + position, Toast.LENGTH_SHORT).show();
+                mSpecialListener.onTaskSpecialClick(position, mNameFragment);
             }
         });
     }
