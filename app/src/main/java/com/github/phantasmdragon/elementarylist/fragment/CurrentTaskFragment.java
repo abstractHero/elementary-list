@@ -13,6 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.github.phantasmdragon.elementarylist.R;
+import com.github.phantasmdragon.elementarylist.activity.MainActivity;
 import com.github.phantasmdragon.elementarylist.custom.rowadapter.CustomRowAdapter;
 
 import org.jetbrains.annotations.Contract;
@@ -22,7 +23,8 @@ import java.util.Map;
 
 public class CurrentTaskFragment extends Fragment {
 
-    public static final String CURRENT_TASK = "CurrentTaskList";
+    private final String NAME_LIST = "currentList";
+    private final String NAME_FILE = "CurrentTaskList";
 
     private CustomRowAdapter rowAdapter;
     private RecyclerView currentTaskRecycler;
@@ -38,7 +40,7 @@ public class CurrentTaskFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        currentTaskPreference = getActivity().getSharedPreferences(CURRENT_TASK, Context.MODE_PRIVATE);
+        currentTaskPreference = getActivity().getSharedPreferences(NAME_FILE, Context.MODE_PRIVATE);
         loadTask();
         setRetainInstance(true);
     }
@@ -48,7 +50,7 @@ public class CurrentTaskFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_current_task, container, false);
 
-        rowAdapter = new CustomRowAdapter(view.getContext(), tasks);
+        rowAdapter = new CustomRowAdapter(view.getContext(), tasks, CurrentTaskFragment.class.getSimpleName());
 
         return view;
     }
@@ -57,7 +59,7 @@ public class CurrentTaskFragment extends Fragment {
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         if(savedInstanceState != null) {
-            tasks = savedInstanceState.getStringArrayList("currentList");
+            tasks = savedInstanceState.getStringArrayList(NAME_LIST);
         }
 
         currentTaskRecycler = (RecyclerView)getActivity().findViewById(R.id.recycler_current_task);
@@ -95,8 +97,8 @@ public class CurrentTaskFragment extends Fragment {
         deleteEditor.apply();
     }
 
-    public void addTaskToList(Bundle infoAboutNewTask) {
-        String taskName = infoAboutNewTask.getString("task_name");
+    public void addTask(Bundle infoAboutNewTask) {
+        String taskName = infoAboutNewTask.getString(MainActivity.NAME_TASK);
         tasks.add(0, taskName);
         saveTask(taskName);
         if (rowAdapter != null) rowAdapter.notifyItemRangeChanged(0, tasks.size());
@@ -104,13 +106,13 @@ public class CurrentTaskFragment extends Fragment {
         currentTaskRecycler.scrollToPosition(0);
     }
 
-    public Bundle getCompletedTask(int position) {
+    public Bundle getInfoAboutTask(int position) {
         Bundle infoAboutTask = new Bundle();
-        infoAboutTask.putString("completed_task_name", tasks.get(position));
+        infoAboutTask.putString(MainActivity.NAME_TASK, tasks.get(position));
         return infoAboutTask;
     }
 
-    public void taskIsFinished(int position) {
+    public void removeTask(int position) {
         deleteTask(position);
         tasks.remove(position);
         rowAdapter.notifyItemRemoved(position);
@@ -120,6 +122,6 @@ public class CurrentTaskFragment extends Fragment {
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putStringArrayList("currentList", tasks);
+        outState.putStringArrayList(NAME_LIST, tasks);
     }
 }
