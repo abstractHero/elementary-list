@@ -1,5 +1,5 @@
 package com.github.phantasmdragon.elementarylist.fragment.listener;
 
 public interface OnCompletedClickListener {
-    void onTaskFinishClick(int position);
+    void onTaskFinishClick(int position, String nameFragment);
 }
