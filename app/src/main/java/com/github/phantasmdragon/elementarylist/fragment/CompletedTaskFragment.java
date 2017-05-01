@@ -12,6 +12,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.github.phantasmdragon.elementarylist.R;
+import com.github.phantasmdragon.elementarylist.activity.MainActivity;
 import com.github.phantasmdragon.elementarylist.custom.rowadapter.CustomRowAdapter;
 
 import org.jetbrains.annotations.Contract;
@@ -21,7 +22,8 @@ import java.util.Map;
 
 public class CompletedTaskFragment extends Fragment {
 
-    public static final String COMPLETED_TASK = "CompletedTaskList";
+    private final String NAME_LIST = "completedList";
+    private final String NAME_FILE = "CompletedTaskList";
 
     private CustomRowAdapter rowAdapter;
     private RecyclerView completedTaskRecycler;
@@ -37,7 +39,7 @@ public class CompletedTaskFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        completedTaskPreference = getActivity().getSharedPreferences(COMPLETED_TASK, Context.MODE_PRIVATE);
+        completedTaskPreference = getActivity().getSharedPreferences(NAME_FILE, Context.MODE_PRIVATE);
         loadTask();
         setRetainInstance(true);
     }
@@ -47,7 +49,7 @@ public class CompletedTaskFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_completed_task, container, false);
 
-        rowAdapter = new CustomRowAdapter(view.getContext(), completedTasks);
+        rowAdapter = new CustomRowAdapter(view.getContext(), completedTasks, CompletedTaskFragment.class.getSimpleName());
 
         return view;
     }
@@ -56,7 +58,7 @@ public class CompletedTaskFragment extends Fragment {
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         if(savedInstanceState != null) {
-            completedTasks = savedInstanceState.getStringArrayList("completedList");
+            completedTasks = savedInstanceState.getStringArrayList(NAME_LIST);
         }
 
         completedTaskRecycler = (RecyclerView)getActivity().findViewById(R.id.recycler_completed_task);
@@ -79,16 +81,35 @@ public class CompletedTaskFragment extends Fragment {
         editor.apply();
     }
 
-    public void addTaskToList(Bundle infoAboutNewTask) {
-        String taskName = infoAboutNewTask.getString("completed_task_name");
+    private void deleteTask(int position) {
+        SharedPreferences.Editor deleteEditor = completedTaskPreference.edit();
+        deleteEditor.remove(String.valueOf(position));
+        deleteEditor.apply();
+    }
+
+    public Bundle getInfoAboutTask(int position) {
+        Bundle infoAboutTask = new Bundle();
+        infoAboutTask.putString(MainActivity.NAME_TASK, completedTasks.get(position));
+        return infoAboutTask;
+    }
+
+    public void addTask(Bundle infoAboutNewTask) {
+        String taskName = infoAboutNewTask.getString(MainActivity.NAME_TASK);
         completedTasks.add(0, taskName);
         saveTask(taskName);
         if (rowAdapter != null) rowAdapter.notifyItemRangeChanged(0, completedTasks.size());
     }
 
+    public void removeTask(int position) {
+        deleteTask(position);
+        completedTasks.remove(position);
+        rowAdapter.notifyItemRemoved(position);
+        rowAdapter.notifyItemRangeChanged(0, completedTasks.size());
+    }
+
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putStringArrayList("completedList", completedTasks);
+        outState.putStringArrayList(NAME_LIST, completedTasks);
     }
 }
