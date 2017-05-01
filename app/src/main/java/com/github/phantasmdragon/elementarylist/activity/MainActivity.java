@@ -24,12 +24,13 @@ import com.github.phantasmdragon.elementarylist.fragment.listener.OnCompletedCli
 import com.github.phantasmdragon.elementarylist.fragment.listener.OnSpecialClickListener;
 
 public class MainActivity extends AppCompatActivity implements AddTaskDialogListener,
-                                                                OnCompletedClickListener,
-                                                                OnSpecialClickListener {
+                                                               OnCompletedClickListener,
+                                                               OnSpecialClickListener {
+
+    public static final String NAME_TASK = "task_name";
 
     private SectionsPagerAdapter mSectionsPagerAdapter;
     private ViewPager mViewPager;
-    private TabLayout tabLayout;
 
     private CurrentTaskFragment currentTaskFragment;
     private CompletedTaskFragment completedTaskFragment;
@@ -37,18 +38,32 @@ public class MainActivity extends AppCompatActivity implements AddTaskDialogList
 
     @Override
     public void onDialogPositiveClick(DialogFragment dialog, Bundle infoAboutNewTask) {
-        currentTaskFragment.addTaskToList(infoAboutNewTask);
+        currentTaskFragment.addTask(infoAboutNewTask);
     }
 
     @Override
-    public void onTaskSpecialClick(int position) {
-
+    public void onTaskSpecialClick(int position, String nameFragment) {
+        if (nameFragment.equals(CurrentTaskFragment.class.getSimpleName())) {
+            specialTaskFragment.addTask(currentTaskFragment.getInfoAboutTask(position));
+            currentTaskFragment.removeTask(position);
+        } else if (nameFragment.equals(SpecialTaskFragment.class.getSimpleName())) {
+            currentTaskFragment.addTask(specialTaskFragment.getInfoAboutTask(position));
+            specialTaskFragment.removeTask(position);
+        }
     }
 
     @Override
-    public void onTaskFinishClick(int position) {
-        completedTaskFragment.addTaskToList(currentTaskFragment.getCompletedTask(position));
-        currentTaskFragment.taskIsFinished(position);
+    public void onTaskFinishClick(int position, String nameFragment) {
+        if (nameFragment.equals(CurrentTaskFragment.class.getSimpleName())) {
+            completedTaskFragment.addTask(currentTaskFragment.getInfoAboutTask(position));
+            currentTaskFragment.removeTask(position);
+        } else if (nameFragment.equals(CompletedTaskFragment.class.getSimpleName())) {
+            currentTaskFragment.addTask(completedTaskFragment.getInfoAboutTask(position));
+            completedTaskFragment.removeTask(position);
+        } else {
+            completedTaskFragment.addTask(specialTaskFragment.getInfoAboutTask(position));
+            specialTaskFragment.removeTask(position);
+        }
     }
 
     @Override
@@ -70,7 +85,7 @@ public class MainActivity extends AppCompatActivity implements AddTaskDialogList
         mViewPager = (ViewPager) findViewById(R.id.container);
         mViewPager.setAdapter(mSectionsPagerAdapter);
 
-        tabLayout = (TabLayout)findViewById(R.id.tabs);
+        TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(mViewPager);
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.button_float);
