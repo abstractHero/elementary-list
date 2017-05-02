@@ -10,6 +10,7 @@ import android.widget.TextView;
 
 import com.github.phantasmdragon.elementarylist.R;
 import com.github.phantasmdragon.elementarylist.fragment.CompletedTaskFragment;
+import com.github.phantasmdragon.elementarylist.fragment.CurrentTaskFragment;
 import com.github.phantasmdragon.elementarylist.fragment.SpecialTaskFragment;
 import com.github.phantasmdragon.elementarylist.fragment.listener.OnCompletedClickListener;
 import com.github.phantasmdragon.elementarylist.fragment.listener.OnSpecialClickListener;
@@ -19,17 +20,24 @@ import java.util.List;
 
 public class CustomRowAdapter extends RecyclerView.Adapter<CustomRowAdapter.ViewHolder> {
 
+    private final int CLICK_DELAY = 800;
+
     private OnCompletedClickListener mCompletedListener;
-    private OnSpecialClickListener   mSpecialListener;
+    private OnSpecialClickListener mSpecialListener;
 
     private List<String> mFragmentTasks;
-    private Context      mContext;
-    private String       mNameFragment;
+    private Context mContext;
+    private String mNameFragment;
+
+    //boolean variable will be deleted later
+    private boolean mIsOneCom = true, mIsOneImp = true;
+    private long mTimeLastClickOnComplete = System.currentTimeMillis();
+    private long mTimeLastClickOnImportant = System.currentTimeMillis();
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
 
-        public CheckBox    mIsTaskCompleted;
-        public TextView    mDescriptionTask;
+        public CheckBox mIsTaskCompleted;
+        public TextView mDescriptionTask;
         public ShineButton mIsImportantTask;
 
         public ViewHolder(View itemView) {
@@ -70,19 +78,34 @@ public class CustomRowAdapter extends RecyclerView.Adapter<CustomRowAdapter.View
             holder.mIsTaskCompleted.setChecked(true);
             holder.mIsImportantTask.setEnabled(false);
         }
-        if (mNameFragment.equals(SpecialTaskFragment.class.getSimpleName())) holder.mIsImportantTask.setChecked(true);
+        if (mNameFragment.equals(CurrentTaskFragment.class.getSimpleName())) {
+            holder.mIsTaskCompleted.setChecked(false);
+            holder.mIsImportantTask.setChecked(false);
+        }
+        if (mNameFragment.equals(SpecialTaskFragment.class.getSimpleName())) {
+            holder.mIsTaskCompleted.setChecked(false);
+            holder.mIsImportantTask.setChecked(true);
+        }
 
         holder.mDescriptionTask.setText(nameTask);
         holder.mIsTaskCompleted.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mCompletedListener.onTaskFinishClick(position, mNameFragment);
+                if (System.currentTimeMillis() - mTimeLastClickOnComplete > CLICK_DELAY || mIsOneCom) {
+                    mTimeLastClickOnComplete = System.currentTimeMillis();
+                    mCompletedListener.onTaskFinishClick(position, mNameFragment);
+                    mIsOneCom = false;
+                }
             }
         });
         holder.mIsImportantTask.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mSpecialListener.onTaskSpecialClick(position, mNameFragment);
+                if (System.currentTimeMillis() - mTimeLastClickOnImportant > CLICK_DELAY || mIsOneImp) {
+                    mTimeLastClickOnImportant = System.currentTimeMillis();
+                    mSpecialListener.onTaskSpecialClick(position, mNameFragment);
+                    mIsOneImp = false;
+                }
             }
         });
     }
