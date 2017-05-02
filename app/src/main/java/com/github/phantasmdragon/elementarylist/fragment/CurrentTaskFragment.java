@@ -79,21 +79,23 @@ public class CurrentTaskFragment extends Fragment {
 
     private void loadTask() {
         Map<String, ?> allPreference = currentTaskPreference.getAll();
-        for (int i = 0; i < allPreference.size(); i++) {
-            String taskName = currentTaskPreference.getString(String.valueOf(i), null);
-            if (taskName != null) tasks.add(0, taskName);
+        if (allPreference.size() > 0) {
+            for (String set: allPreference.keySet()) {
+                String taskName = currentTaskPreference.getString(set, "");
+                tasks.add(0, taskName);
+            }
         }
     }
 
     private void saveTask(String taskName) {
         SharedPreferences.Editor saveEditor = currentTaskPreference.edit();
-        saveEditor.putString(String.valueOf(tasks.size()-1), taskName);
+        saveEditor.putString(String.valueOf(taskName.hashCode()), taskName);
         saveEditor.apply();
     }
 
-    private void deleteTask(int position) {
+    private void deleteTask(String taskName) {
         SharedPreferences.Editor deleteEditor = currentTaskPreference.edit();
-        deleteEditor.remove(String.valueOf(position));
+        deleteEditor.remove(String.valueOf(taskName.hashCode()));
         deleteEditor.apply();
     }
 
@@ -101,7 +103,7 @@ public class CurrentTaskFragment extends Fragment {
         String taskName = infoAboutNewTask.getString(MainActivity.NAME_TASK);
         tasks.add(0, taskName);
         saveTask(taskName);
-        if (rowAdapter != null) rowAdapter.notifyItemRangeChanged(0, tasks.size());
+        rowAdapter.notifyItemRangeChanged(0, tasks.size());
 
         currentTaskRecycler.scrollToPosition(0);
     }
@@ -113,7 +115,7 @@ public class CurrentTaskFragment extends Fragment {
     }
 
     public void removeTask(int position) {
-        deleteTask(position);
+        deleteTask(tasks.get(position));
         tasks.remove(position);
         rowAdapter.notifyItemRemoved(position);
         rowAdapter.notifyItemRangeChanged(0, tasks.size());

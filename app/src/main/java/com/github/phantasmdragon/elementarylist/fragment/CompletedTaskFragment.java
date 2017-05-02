@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -65,25 +66,36 @@ public class CompletedTaskFragment extends Fragment {
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity());
         completedTaskRecycler.setLayoutManager(layoutManager);
         completedTaskRecycler.setAdapter(rowAdapter);
+
+        final FloatingActionButton fab = ((FloatingActionButton)getActivity().findViewById(R.id.button_float));
+        completedTaskRecycler.addOnScrollListener(new RecyclerView.OnScrollListener(){
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                if (dy > 0) fab.hide();
+                else        fab.show();
+            }
+        });
     }
 
     private void loadTask() {
         Map<String, ?> allPreference = completedTaskPreference.getAll();
-        for (int i = 0; i < allPreference.size(); i++) {
-            String taskName = completedTaskPreference.getString(String.valueOf(i), null);
-            if (taskName != null) completedTasks.add(0, taskName);
+        if (allPreference.size() > 0) {
+            for (String set: allPreference.keySet()) {
+                String taskName = completedTaskPreference.getString(set, "");
+                completedTasks.add(0, taskName);
+            }
         }
     }
 
     private void saveTask(String taskName) {
         SharedPreferences.Editor editor = completedTaskPreference.edit();
-        editor.putString(String.valueOf(completedTasks.size()-1), taskName);
+        editor.putString(String.valueOf(taskName.hashCode()), taskName);
         editor.apply();
     }
 
-    private void deleteTask(int position) {
+    private void deleteTask(String taskName) {
         SharedPreferences.Editor deleteEditor = completedTaskPreference.edit();
-        deleteEditor.remove(String.valueOf(position));
+        deleteEditor.remove(String.valueOf(taskName.hashCode()));
         deleteEditor.apply();
     }
 
@@ -97,11 +109,13 @@ public class CompletedTaskFragment extends Fragment {
         String taskName = infoAboutNewTask.getString(MainActivity.NAME_TASK);
         completedTasks.add(0, taskName);
         saveTask(taskName);
-        if (rowAdapter != null) rowAdapter.notifyItemRangeChanged(0, completedTasks.size());
+        rowAdapter.notifyItemRangeChanged(0, completedTasks.size());
+
+        completedTaskRecycler.scrollToPosition(0);
     }
 
     public void removeTask(int position) {
-        deleteTask(position);
+        deleteTask(completedTasks.get(position));
         completedTasks.remove(position);
         rowAdapter.notifyItemRemoved(position);
         rowAdapter.notifyItemRangeChanged(0, completedTasks.size());
