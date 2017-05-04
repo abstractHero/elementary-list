@@ -2,8 +2,9 @@ package com.github.phantasmdragon.elementarylist.fragment;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.support.annotation.Nullable;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
@@ -19,10 +20,13 @@ import com.github.phantasmdragon.elementarylist.custom.rowadapter.CustomRowAdapt
 import org.jetbrains.annotations.Contract;
 
 import java.util.ArrayList;
-import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.UUID;
 
 public class SpecialTaskFragment extends Fragment {
 
+    private final String NAME_LIST_ID = "specialId";
     private final String NAME_LIST = "specialList";
     private final String NAME_FILE = "SpecialTaskList";
 
@@ -31,7 +35,7 @@ public class SpecialTaskFragment extends Fragment {
     private SharedPreferences specialTaskPreference;
 
     private ArrayList<String> specialTasks = new ArrayList<>();
-
+    private ArrayList<String> specialTasksId = new ArrayList<>();
 
     @Contract(" -> !null")
     public static SpecialTaskFragment newInstance() {
@@ -61,6 +65,7 @@ public class SpecialTaskFragment extends Fragment {
         super.onActivityCreated(savedInstanceState);
         if(savedInstanceState != null) {
             specialTasks = savedInstanceState.getStringArrayList(NAME_LIST);
+            specialTasksId = savedInstanceState.getStringArrayList(NAME_LIST_ID);
         }
 
         specialTaskRecycler = (RecyclerView)getActivity().findViewById(R.id.recycler_special_task);
@@ -79,31 +84,31 @@ public class SpecialTaskFragment extends Fragment {
     }
 
     private void loadTask() {
-        Map<String, ?> allPreference = specialTaskPreference.getAll();
-        if (allPreference.size() > 0) {
-            for (String set: allPreference.keySet()) {
-                String taskName = specialTaskPreference.getString(set, "");
-                specialTasks.add(0, taskName);
-            }
+        Set<String> keySet = specialTaskPreference.getAll().keySet();
+        TreeSet<String> sortKeySet = new TreeSet<>(keySet);
+        for (String key: sortKeySet) {
+            specialTasks.add(specialTaskPreference.getString(key, ""));
+            specialTasksId.add(key.substring(key.indexOf("_")+1));
         }
     }
 
-    private void saveTask(String taskName) {
+    private void saveTask(String taskId, Bundle taskInfo) {
         SharedPreferences.Editor saveEditor = specialTaskPreference.edit();
-        saveEditor.putString(String.valueOf(taskName.hashCode()), taskName);
-        saveEditor.apply();
+        saveEditor.putString(taskId, taskInfo.getString(MainActivity.NAME_TASK))
+                .apply();
     }
 
-    private void deleteTask(String taskName) {
+    private void deleteTask(String taskId) {
         SharedPreferences.Editor deleteEditor = specialTaskPreference.edit();
-        deleteEditor.remove(String.valueOf(taskName.hashCode()));
-        deleteEditor.apply();
+        if (specialTaskPreference.contains(taskId)) deleteEditor.remove(taskId).apply();
+        else deleteEditor.remove(getKeyWithoutPrefix(taskId)).apply();
     }
 
     public void addTask(Bundle infoAboutNewTask) {
-        String taskName = infoAboutNewTask.getString(MainActivity.NAME_TASK);
-        specialTasks.add(0, taskName);
-        saveTask(taskName);
+        specialTasksId.add(0, new UUID(System.currentTimeMillis(), System.nanoTime()).toString());
+
+        specialTasks.add(0, infoAboutNewTask.getString(MainActivity.NAME_TASK));
+        saveTask(specialTasksId.get(0), infoAboutNewTask);
         rowAdapter.notifyItemRangeChanged(0, specialTasks.size());
 
         specialTaskRecycler.scrollToPosition(0);
@@ -116,8 +121,9 @@ public class SpecialTaskFragment extends Fragment {
     }
 
     public void removeTask(int position) {
-        deleteTask(specialTasks.get(position));
+        deleteTask(getKey(position, specialTasksId.get(position)));
         specialTasks.remove(position);
+        specialTasksId.remove(position);
         rowAdapter.notifyItemRemoved(position);
         rowAdapter.notifyItemRangeChanged(0, specialTasks.size());
     }
@@ -126,5 +132,31 @@ public class SpecialTaskFragment extends Fragment {
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putStringArrayList(NAME_LIST, specialTasks);
+        outState.putStringArrayList(NAME_LIST_ID, specialTasksId);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        SharedPreferences.Editor positionEditor = specialTaskPreference.edit();
+        positionEditor.clear();
+        for (int i = 0; i < specialTasks.size(); i++) {
+
+            String id = specialTasksId.get(i),
+                    key = getKey(i, id);
+
+            positionEditor.putString(key, specialTasks.get(i));
+        }
+        positionEditor.apply();
+    }
+
+    @NonNull
+    private String getKey(int index, String key) {
+        return String.valueOf(index).concat("_" + key);
+    }
+
+    @NonNull
+    private String getKeyWithoutPrefix(String key) {
+        return key.substring(key.indexOf("_")+1);
     }
 }

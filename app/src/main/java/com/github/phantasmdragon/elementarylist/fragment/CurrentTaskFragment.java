@@ -3,6 +3,7 @@ package com.github.phantasmdragon.elementarylist.fragment;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
@@ -19,18 +20,22 @@ import com.github.phantasmdragon.elementarylist.custom.rowadapter.CustomRowAdapt
 import org.jetbrains.annotations.Contract;
 
 import java.util.ArrayList;
-import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.UUID;
 
 public class CurrentTaskFragment extends Fragment {
 
-    private final String NAME_LIST = "currentList";
+    private final String NAME_LIST_ID = "unfulfilledId";
+    private final String NAME_LIST = "unfulfilledList";
     private final String NAME_FILE = "CurrentTaskList";
 
     private CustomRowAdapter rowAdapter;
     private RecyclerView currentTaskRecycler;
     private SharedPreferences currentTaskPreference;
 
-    private ArrayList<String> tasks = new ArrayList<>();
+    private ArrayList<String> unfulfilledTasks = new ArrayList<>();
+    private ArrayList<String> unfulfilledTasksId = new ArrayList<>();
 
     @Contract(" -> !null")
     public static CurrentTaskFragment newInstance() {
@@ -50,7 +55,7 @@ public class CurrentTaskFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_current_task, container, false);
 
-        rowAdapter = new CustomRowAdapter(view.getContext(), tasks, CurrentTaskFragment.class.getSimpleName());
+        rowAdapter = new CustomRowAdapter(view.getContext(), unfulfilledTasks, CurrentTaskFragment.class.getSimpleName());
 
         return view;
     }
@@ -59,7 +64,8 @@ public class CurrentTaskFragment extends Fragment {
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         if(savedInstanceState != null) {
-            tasks = savedInstanceState.getStringArrayList(NAME_LIST);
+            unfulfilledTasks = savedInstanceState.getStringArrayList(NAME_LIST);
+            unfulfilledTasksId = savedInstanceState.getStringArrayList(NAME_LIST_ID);
         }
 
         currentTaskRecycler = (RecyclerView)getActivity().findViewById(R.id.recycler_current_task);
@@ -78,52 +84,79 @@ public class CurrentTaskFragment extends Fragment {
     }
 
     private void loadTask() {
-        Map<String, ?> allPreference = currentTaskPreference.getAll();
-        if (allPreference.size() > 0) {
-            for (String set: allPreference.keySet()) {
-                String taskName = currentTaskPreference.getString(set, "");
-                tasks.add(0, taskName);
-            }
+        Set<String> keySet = currentTaskPreference.getAll().keySet();
+        TreeSet<String> sortKeySet = new TreeSet<>(keySet);
+        for (String key: sortKeySet) {
+            unfulfilledTasks.add(currentTaskPreference.getString(key, ""));
+            unfulfilledTasksId.add(key.substring(key.indexOf("_")+1));
         }
     }
 
-    private void saveTask(String taskName) {
+    private void saveTask(String taskId, Bundle taskInfo) {
         SharedPreferences.Editor saveEditor = currentTaskPreference.edit();
-        saveEditor.putString(String.valueOf(taskName.hashCode()), taskName);
-        saveEditor.apply();
+        saveEditor.putString(taskId, taskInfo.getString(MainActivity.NAME_TASK))
+                  .apply();
     }
 
-    private void deleteTask(String taskName) {
+    private void deleteTask(String taskId) {
         SharedPreferences.Editor deleteEditor = currentTaskPreference.edit();
-        deleteEditor.remove(String.valueOf(taskName.hashCode()));
-        deleteEditor.apply();
+        if (currentTaskPreference.contains(taskId)) deleteEditor.remove(taskId).apply();
+        else deleteEditor.remove(getKeyWithoutPrefix(taskId)).apply();
     }
 
     public void addTask(Bundle infoAboutNewTask) {
-        String taskName = infoAboutNewTask.getString(MainActivity.NAME_TASK);
-        tasks.add(0, taskName);
-        saveTask(taskName);
-        rowAdapter.notifyItemRangeChanged(0, tasks.size());
+        unfulfilledTasksId.add(0, new UUID(System.currentTimeMillis(), System.nanoTime()).toString());
+
+        unfulfilledTasks.add(0, infoAboutNewTask.getString(MainActivity.NAME_TASK));
+        saveTask(unfulfilledTasksId.get(0), infoAboutNewTask);
+        rowAdapter.notifyItemRangeChanged(0, unfulfilledTasks.size());
 
         currentTaskRecycler.scrollToPosition(0);
     }
 
     public Bundle getInfoAboutTask(int position) {
         Bundle infoAboutTask = new Bundle();
-        infoAboutTask.putString(MainActivity.NAME_TASK, tasks.get(position));
+        infoAboutTask.putString(MainActivity.NAME_TASK, unfulfilledTasks.get(position));
         return infoAboutTask;
     }
 
     public void removeTask(int position) {
-        deleteTask(tasks.get(position));
-        tasks.remove(position);
+        deleteTask(getKey(position, unfulfilledTasksId.get(position)));
+        unfulfilledTasks.remove(position);
+        unfulfilledTasksId.remove(position);
         rowAdapter.notifyItemRemoved(position);
-        rowAdapter.notifyItemRangeChanged(0, tasks.size());
+        rowAdapter.notifyItemRangeChanged(0, unfulfilledTasks.size());
     }
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putStringArrayList(NAME_LIST, tasks);
+        outState.putStringArrayList(NAME_LIST, unfulfilledTasks);
+        outState.putStringArrayList(NAME_LIST_ID, unfulfilledTasksId);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        SharedPreferences.Editor positionEditor = currentTaskPreference.edit();
+        positionEditor.clear();
+        for (int i = 0; i < unfulfilledTasks.size(); i++) {
+
+            String id = unfulfilledTasksId.get(i),
+                  key = getKey(i, id);
+
+            positionEditor.putString(key, unfulfilledTasks.get(i));
+        }
+        positionEditor.apply();
+    }
+
+    @NonNull
+    private String getKey(int index, String key) {
+        return String.valueOf(index).concat("_" + key);
+    }
+
+    @NonNull
+    private String getKeyWithoutPrefix(String key) {
+        return key.substring(key.indexOf("_")+1);
     }
 }

@@ -3,6 +3,7 @@ package com.github.phantasmdragon.elementarylist.fragment;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
@@ -19,10 +20,13 @@ import com.github.phantasmdragon.elementarylist.custom.rowadapter.CustomRowAdapt
 import org.jetbrains.annotations.Contract;
 
 import java.util.ArrayList;
-import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.UUID;
 
 public class CompletedTaskFragment extends Fragment {
 
+    private final String NAME_LIST_ID = "completedId";
     private final String NAME_LIST = "completedList";
     private final String NAME_FILE = "CompletedTaskList";
 
@@ -31,6 +35,7 @@ public class CompletedTaskFragment extends Fragment {
     private SharedPreferences completedTaskPreference;
 
     private ArrayList<String> completedTasks = new ArrayList<>();
+    private ArrayList<String> completedTasksId = new ArrayList<>();
 
     @Contract(" -> !null")
     public static CompletedTaskFragment newInstance() {
@@ -60,6 +65,7 @@ public class CompletedTaskFragment extends Fragment {
         super.onActivityCreated(savedInstanceState);
         if(savedInstanceState != null) {
             completedTasks = savedInstanceState.getStringArrayList(NAME_LIST);
+            completedTasksId = savedInstanceState.getStringArrayList(NAME_LIST_ID);
         }
 
         completedTaskRecycler = (RecyclerView)getActivity().findViewById(R.id.recycler_completed_task);
@@ -78,25 +84,24 @@ public class CompletedTaskFragment extends Fragment {
     }
 
     private void loadTask() {
-        Map<String, ?> allPreference = completedTaskPreference.getAll();
-        if (allPreference.size() > 0) {
-            for (String set: allPreference.keySet()) {
-                String taskName = completedTaskPreference.getString(set, "");
-                completedTasks.add(0, taskName);
-            }
+        Set<String> keySet = completedTaskPreference.getAll().keySet();
+        TreeSet<String> sortKeySet = new TreeSet<>(keySet);
+        for (String key: sortKeySet) {
+            completedTasks.add(completedTaskPreference.getString(key, ""));
+            completedTasksId.add(key.substring(key.indexOf("_")+1));
         }
     }
 
-    private void saveTask(String taskName) {
-        SharedPreferences.Editor editor = completedTaskPreference.edit();
-        editor.putString(String.valueOf(taskName.hashCode()), taskName);
-        editor.apply();
+    private void saveTask(String taskId, Bundle taskInfo) {
+        SharedPreferences.Editor saveEditor = completedTaskPreference.edit();
+        saveEditor.putString(taskId, taskInfo.getString(MainActivity.NAME_TASK))
+                .apply();
     }
 
-    private void deleteTask(String taskName) {
+    private void deleteTask(String taskId) {
         SharedPreferences.Editor deleteEditor = completedTaskPreference.edit();
-        deleteEditor.remove(String.valueOf(taskName.hashCode()));
-        deleteEditor.apply();
+        if (completedTaskPreference.contains(taskId)) deleteEditor.remove(taskId).apply();
+        else deleteEditor.remove(getKeyWithoutPrefix(taskId)).apply();
     }
 
     public Bundle getInfoAboutTask(int position) {
@@ -106,17 +111,19 @@ public class CompletedTaskFragment extends Fragment {
     }
 
     public void addTask(Bundle infoAboutNewTask) {
-        String taskName = infoAboutNewTask.getString(MainActivity.NAME_TASK);
-        completedTasks.add(0, taskName);
-        saveTask(taskName);
+        completedTasksId.add(0, new UUID(System.currentTimeMillis(), System.nanoTime()).toString());
+
+        completedTasks.add(0, infoAboutNewTask.getString(MainActivity.NAME_TASK));
+        saveTask(completedTasksId.get(0), infoAboutNewTask);
         rowAdapter.notifyItemRangeChanged(0, completedTasks.size());
 
         completedTaskRecycler.scrollToPosition(0);
     }
 
     public void removeTask(int position) {
-        deleteTask(completedTasks.get(position));
+        deleteTask(getKey(position, completedTasksId.get(position)));
         completedTasks.remove(position);
+        completedTasksId.remove(position);
         rowAdapter.notifyItemRemoved(position);
         rowAdapter.notifyItemRangeChanged(0, completedTasks.size());
     }
@@ -125,5 +132,31 @@ public class CompletedTaskFragment extends Fragment {
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putStringArrayList(NAME_LIST, completedTasks);
+        outState.putStringArrayList(NAME_LIST_ID, completedTasksId);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        SharedPreferences.Editor positionEditor = completedTaskPreference.edit();
+        positionEditor.clear();
+        for (int i = 0; i < completedTasks.size(); i++) {
+
+            String id = completedTasksId.get(i),
+                    key = getKey(i, id);
+
+            positionEditor.putString(key, completedTasks.get(i));
+        }
+        positionEditor.apply();
+    }
+
+    @NonNull
+    private String getKey(int index, String key) {
+        return String.valueOf(index).concat("_" + key);
+    }
+
+    @NonNull
+    private String getKeyWithoutPrefix(String key) {
+        return key.substring(key.indexOf("_")+1);
     }
 }
