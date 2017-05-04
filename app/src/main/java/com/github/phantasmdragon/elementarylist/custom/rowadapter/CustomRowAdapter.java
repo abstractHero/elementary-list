@@ -10,7 +10,7 @@ import android.widget.TextView;
 
 import com.github.phantasmdragon.elementarylist.R;
 import com.github.phantasmdragon.elementarylist.fragment.CompletedTaskFragment;
-import com.github.phantasmdragon.elementarylist.fragment.CurrentTaskFragment;
+import com.github.phantasmdragon.elementarylist.fragment.UnfulfilledTaskFragment;
 import com.github.phantasmdragon.elementarylist.fragment.SpecialTaskFragment;
 import com.github.phantasmdragon.elementarylist.fragment.listener.OnCompletedClickListener;
 import com.github.phantasmdragon.elementarylist.fragment.listener.OnSpecialClickListener;
@@ -78,7 +78,7 @@ public class CustomRowAdapter extends RecyclerView.Adapter<CustomRowAdapter.View
             holder.mIsTaskCompleted.setChecked(true);
             holder.mIsImportantTask.setEnabled(false);
         }
-        if (mNameFragment.equals(CurrentTaskFragment.class.getSimpleName())) {
+        if (mNameFragment.equals(UnfulfilledTaskFragment.class.getSimpleName())) {
             holder.mIsTaskCompleted.setChecked(false);
             holder.mIsImportantTask.setChecked(false);
         }
