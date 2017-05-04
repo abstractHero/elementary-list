@@ -17,7 +17,7 @@ import android.view.View;
 import com.github.phantasmdragon.elementarylist.R;
 import com.github.phantasmdragon.elementarylist.fragment.AddTaskDialogFragment;
 import com.github.phantasmdragon.elementarylist.fragment.CompletedTaskFragment;
-import com.github.phantasmdragon.elementarylist.fragment.CurrentTaskFragment;
+import com.github.phantasmdragon.elementarylist.fragment.UnfulfilledTaskFragment;
 import com.github.phantasmdragon.elementarylist.fragment.SpecialTaskFragment;
 import com.github.phantasmdragon.elementarylist.fragment.listener.AddTaskDialogListener;
 import com.github.phantasmdragon.elementarylist.fragment.listener.OnCompletedClickListener;
@@ -32,33 +32,33 @@ public class MainActivity extends AppCompatActivity implements AddTaskDialogList
     private SectionsPagerAdapter mSectionsPagerAdapter;
     private ViewPager mViewPager;
 
-    private CurrentTaskFragment currentTaskFragment;
+    private UnfulfilledTaskFragment unfulfilledTaskFragment;
     private CompletedTaskFragment completedTaskFragment;
     private SpecialTaskFragment specialTaskFragment;
 
     @Override
     public void onDialogPositiveClick(DialogFragment dialog, Bundle infoAboutNewTask) {
-        currentTaskFragment.addTask(infoAboutNewTask);
+        unfulfilledTaskFragment.addTask(infoAboutNewTask);
     }
 
     @Override
     public void onTaskSpecialClick(int position, String nameFragment) {
-        if (nameFragment.equals(CurrentTaskFragment.class.getSimpleName())) {
-            specialTaskFragment.addTask(currentTaskFragment.getInfoAboutTask(position));
-            currentTaskFragment.removeTask(position);
+        if (nameFragment.equals(UnfulfilledTaskFragment.class.getSimpleName())) {
+            specialTaskFragment.addTask(unfulfilledTaskFragment.getInfoAboutTask(position));
+            unfulfilledTaskFragment.removeTask(position);
         } else if (nameFragment.equals(SpecialTaskFragment.class.getSimpleName())) {
-            currentTaskFragment.addTask(specialTaskFragment.getInfoAboutTask(position));
+            unfulfilledTaskFragment.addTask(specialTaskFragment.getInfoAboutTask(position));
             specialTaskFragment.removeTask(position);
         }
     }
 
     @Override
     public void onTaskFinishClick(int position, String nameFragment) {
-        if (nameFragment.equals(CurrentTaskFragment.class.getSimpleName())) {
-            completedTaskFragment.addTask(currentTaskFragment.getInfoAboutTask(position));
-            currentTaskFragment.removeTask(position);
+        if (nameFragment.equals(UnfulfilledTaskFragment.class.getSimpleName())) {
+            completedTaskFragment.addTask(unfulfilledTaskFragment.getInfoAboutTask(position));
+            unfulfilledTaskFragment.removeTask(position);
         } else if (nameFragment.equals(CompletedTaskFragment.class.getSimpleName())) {
-            currentTaskFragment.addTask(completedTaskFragment.getInfoAboutTask(position));
+            unfulfilledTaskFragment.addTask(completedTaskFragment.getInfoAboutTask(position));
             completedTaskFragment.removeTask(position);
         } else {
             completedTaskFragment.addTask(specialTaskFragment.getInfoAboutTask(position));
@@ -73,7 +73,7 @@ public class MainActivity extends AppCompatActivity implements AddTaskDialogList
 
         if (savedInstanceState != null) {
             completedTaskFragment = (CompletedTaskFragment)getSupportFragmentManager().getFragment(savedInstanceState, "completedTaskFragment");
-            currentTaskFragment = (CurrentTaskFragment)getSupportFragmentManager().getFragment(savedInstanceState, "currentTaskFragment");
+            unfulfilledTaskFragment = (UnfulfilledTaskFragment)getSupportFragmentManager().getFragment(savedInstanceState, "unfulfilledTaskFragment");
             specialTaskFragment = (SpecialTaskFragment)getSupportFragmentManager().getFragment(savedInstanceState, "specialTaskFragment");
         }
 
@@ -101,7 +101,7 @@ public class MainActivity extends AppCompatActivity implements AddTaskDialogList
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        getSupportFragmentManager().putFragment(outState, "currentTaskFragment", currentTaskFragment);
+        getSupportFragmentManager().putFragment(outState, "unfulfilledTaskFragment", unfulfilledTaskFragment);
         getSupportFragmentManager().putFragment(outState, "completedTaskFragment", completedTaskFragment);
         getSupportFragmentManager().putFragment(outState, "specialTaskFragment", specialTaskFragment);
     }
@@ -146,8 +146,8 @@ public class MainActivity extends AppCompatActivity implements AddTaskDialogList
                 completedTaskFragment = CompletedTaskFragment.newInstance();
                 return completedTaskFragment;
             } else if (position == 1) {
-                currentTaskFragment = CurrentTaskFragment.newInstance();
-                return currentTaskFragment;
+                unfulfilledTaskFragment = UnfulfilledTaskFragment.newInstance();
+                return unfulfilledTaskFragment;
             } else {
                 specialTaskFragment = SpecialTaskFragment.newInstance();
                 return specialTaskFragment;
