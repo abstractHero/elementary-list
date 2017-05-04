@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:id="@+id/fragment_current"
-    tools:context="com.github.phantasmdragon.elementarylist.fragment.CurrentTaskFragment">
+    tools:context="com.github.phantasmdragon.elementarylist.fragment.UnfulfilledTaskFragment">
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/recycler_current_task"
