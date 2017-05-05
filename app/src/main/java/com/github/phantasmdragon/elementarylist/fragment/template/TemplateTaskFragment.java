@@ -36,12 +36,15 @@ public class TemplateTaskFragment extends Fragment {
 
     private ArrayList<String> task = new ArrayList<>();
     private ArrayList<String> taskId = new ArrayList<>();
-    
+
+    private int mLayout;
+    private int mRecyclerId;
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setNames();
-        
+        setLayoutAndRecycler();
         taskPreference = getActivity().getSharedPreferences(nameFile, Context.MODE_PRIVATE);
         loadTask();
         setRetainInstance(true);
@@ -54,7 +57,20 @@ public class TemplateTaskFragment extends Fragment {
         nameListId = names.getString("nameListId");
         nameFragment = names.getString("nameFragment");
     }
-    
+
+    private void setLayoutAndRecycler() {
+        if (nameFragment.equals(UnfulfilledTaskFragment.NAME_THIS)) {
+            mLayout = R.layout.fragment_current_task;
+            mRecyclerId = R.id.recycler_current_task;
+        } else if (nameFragment.equals(CompletedTaskFragment.NAME_THIS)) {
+            mLayout = R.layout.fragment_completed_task;
+            mRecyclerId = R.id.recycler_completed_task;
+        } else {
+            mLayout = R.layout.fragment_special_task;
+            mRecyclerId = R.id.recycler_special_task;
+        }
+    }
+
     protected void loadTask() {
         TreeSet<String> sortKeySet = new TreeSet<>(taskPreference.getAll().keySet());
         for (String key: sortKeySet) {
@@ -66,13 +82,7 @@ public class TemplateTaskFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view;
-        if (nameFragment.equals(UnfulfilledTaskFragment.class.getSimpleName())) {
-            view = inflater.inflate(R.layout.fragment_current_task, container, false);
-        } else if (nameFragment.equals(CompletedTaskFragment.class.getSimpleName())) {
-            view = inflater.inflate(R.layout.fragment_completed_task, container, false);
-        } else view = inflater.inflate(R.layout.fragment_special_task, container, false);
-
+        View view = inflater.inflate(mLayout, container, false);
         rowAdapter = new CustomRowAdapter(view.getContext(), task, nameFragment);
         return view;
     }
@@ -85,9 +95,8 @@ public class TemplateTaskFragment extends Fragment {
             taskId = savedInstanceState.getStringArrayList(nameListId);
         }
 
-        setTaskRecycler();
-        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity());
-        taskRecycler.setLayoutManager(layoutManager);
+        taskRecycler = (RecyclerView)getActivity().findViewById(mRecyclerId);
+        taskRecycler.setLayoutManager(new LinearLayoutManager(getActivity()));
         taskRecycler.setAdapter(rowAdapter);
 
         final FloatingActionButton fab = ((FloatingActionButton)getActivity().findViewById(R.id.button_float));
@@ -98,14 +107,6 @@ public class TemplateTaskFragment extends Fragment {
                 else        fab.show();
             }
         });
-    }
-
-    private void setTaskRecycler() {
-        if (nameFragment.equals(UnfulfilledTaskFragment.class.getSimpleName())) {
-            taskRecycler = (RecyclerView)getActivity().findViewById(R.id.recycler_current_task);
-        } else if (nameFragment.equals(CompletedTaskFragment.class.getSimpleName())) {
-            taskRecycler = (RecyclerView)getActivity().findViewById(R.id.recycler_completed_task);
-        } else taskRecycler = (RecyclerView)getActivity().findViewById(R.id.recycler_special_task);
     }
 
     public void addTask(Bundle infoAboutNewTask) {
