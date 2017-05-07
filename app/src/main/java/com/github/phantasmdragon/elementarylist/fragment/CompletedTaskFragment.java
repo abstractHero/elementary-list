@@ -1,6 +1,7 @@
 package com.github.phantasmdragon.elementarylist.fragment;
 
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 
 import com.github.phantasmdragon.elementarylist.fragment.template.TemplateTaskFragment;
 
@@ -25,5 +26,11 @@ public class CompletedTaskFragment extends TemplateTaskFragment {
         names.putString("nameListId", NAME_LIST_ID);
         names.putString("nameFragment", CompletedTaskFragment.NAME_THIS);
         return names;
+    }
+
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        setDecoration();
     }
 }

@@ -15,6 +15,7 @@ import android.view.ViewGroup;
 
 import com.github.phantasmdragon.elementarylist.R;
 import com.github.phantasmdragon.elementarylist.activity.MainActivity;
+import com.github.phantasmdragon.elementarylist.custom.itemdecoration.CrossedOutItemDecoration;
 import com.github.phantasmdragon.elementarylist.custom.rowadapter.CustomRowAdapter;
 import com.github.phantasmdragon.elementarylist.fragment.CompletedTaskFragment;
 import com.github.phantasmdragon.elementarylist.fragment.UnfulfilledTaskFragment;
@@ -107,6 +108,10 @@ public class TemplateTaskFragment extends Fragment {
                 else        fab.show();
             }
         });
+    }
+
+    protected void setDecoration() {
+        taskRecycler.addItemDecoration(new CrossedOutItemDecoration(getContext()));
     }
 
     public void addTask(Bundle infoAboutNewTask) {
