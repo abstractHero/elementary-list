@@ -119,15 +119,20 @@ public class TemplateTaskFragment extends Fragment {
         task.add(0, infoAboutNewTask.getString(MainActivity.NAME_TASK));
 
         saveTask(taskId.get(0), infoAboutNewTask);
+    }
 
+    public void updatingAdapterAfterAdd() {
         rowAdapter.notifyItemRangeChanged(0, task.size());
-        taskRecycler.scrollToPosition(0);
+        taskRecycler.scrollToPosition(0); //TODO: Run is scroll depending on the settings
     }
 
     public void removeTask(int position) {
         removeTaskFromFile(getKey(position, taskId.get(position)));
         task.remove(position);
         taskId.remove(position);
+    }
+
+    public void updatingAdapterAfterRemove(int position) {
         rowAdapter.notifyItemRemoved(position);
         rowAdapter.notifyItemRangeChanged(0, task.size());
     }
