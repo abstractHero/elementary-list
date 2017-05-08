@@ -15,10 +15,11 @@ import android.view.MenuItem;
 import android.view.View;
 
 import com.github.phantasmdragon.elementarylist.R;
+import com.github.phantasmdragon.elementarylist.activity.async.MoveAsyncTask;
 import com.github.phantasmdragon.elementarylist.fragment.AddTaskDialogFragment;
 import com.github.phantasmdragon.elementarylist.fragment.CompletedTaskFragment;
-import com.github.phantasmdragon.elementarylist.fragment.UnfulfilledTaskFragment;
 import com.github.phantasmdragon.elementarylist.fragment.SpecialTaskFragment;
+import com.github.phantasmdragon.elementarylist.fragment.UnfulfilledTaskFragment;
 import com.github.phantasmdragon.elementarylist.fragment.listener.AddTaskDialogListener;
 import com.github.phantasmdragon.elementarylist.fragment.listener.OnCompletedClickListener;
 import com.github.phantasmdragon.elementarylist.fragment.listener.OnSpecialClickListener;
@@ -39,31 +40,31 @@ public class MainActivity extends AppCompatActivity implements AddTaskDialogList
     @Override
     public void onDialogPositiveClick(DialogFragment dialog, Bundle infoAboutNewTask) {
         unfulfilledTaskFragment.addTask(infoAboutNewTask);
+        unfulfilledTaskFragment.updatingAdapterAfterAdd();
     }
 
     @Override
     public void onTaskSpecialClick(int position, String nameFragment) {
-        if (nameFragment.equals(UnfulfilledTaskFragment.class.getSimpleName())) {
-            specialTaskFragment.addTask(unfulfilledTaskFragment.getInfoAboutTask(position));
-            unfulfilledTaskFragment.removeTask(position);
-        } else if (nameFragment.equals(SpecialTaskFragment.class.getSimpleName())) {
-            unfulfilledTaskFragment.addTask(specialTaskFragment.getInfoAboutTask(position));
-            specialTaskFragment.removeTask(position);
+        if (nameFragment.equals(UnfulfilledTaskFragment.NAME_THIS)) {
+            moveTask(unfulfilledTaskFragment, specialTaskFragment, position);
+        } else if (nameFragment.equals(SpecialTaskFragment.NAME_THIS)) {
+            moveTask(specialTaskFragment, unfulfilledTaskFragment, position);
         }
     }
 
     @Override
     public void onTaskFinishClick(int position, String nameFragment) {
-        if (nameFragment.equals(UnfulfilledTaskFragment.class.getSimpleName())) {
-            completedTaskFragment.addTask(unfulfilledTaskFragment.getInfoAboutTask(position));
-            unfulfilledTaskFragment.removeTask(position);
-        } else if (nameFragment.equals(CompletedTaskFragment.class.getSimpleName())) {
-            unfulfilledTaskFragment.addTask(completedTaskFragment.getInfoAboutTask(position));
-            completedTaskFragment.removeTask(position);
+        if (nameFragment.equals(UnfulfilledTaskFragment.NAME_THIS)) {
+            moveTask(unfulfilledTaskFragment, completedTaskFragment, position);
+        } else if (nameFragment.equals(CompletedTaskFragment.NAME_THIS)) {
+            moveTask(completedTaskFragment, unfulfilledTaskFragment, position);
         } else {
-            completedTaskFragment.addTask(specialTaskFragment.getInfoAboutTask(position));
-            specialTaskFragment.removeTask(position);
+            moveTask(specialTaskFragment, completedTaskFragment, position);
         }
+    }
+
+    private void moveTask(Object fromWhich, Object whither, int currentPosition) {
+        new MoveAsyncTask().execute(fromWhich, whither, currentPosition);
     }
 
     @Override
@@ -72,8 +73,8 @@ public class MainActivity extends AppCompatActivity implements AddTaskDialogList
         setContentView(R.layout.activity_main);
 
         if (savedInstanceState != null) {
-            completedTaskFragment = (CompletedTaskFragment)getSupportFragmentManager().getFragment(savedInstanceState, "completedTaskFragment");
             unfulfilledTaskFragment = (UnfulfilledTaskFragment)getSupportFragmentManager().getFragment(savedInstanceState, "unfulfilledTaskFragment");
+            completedTaskFragment = (CompletedTaskFragment)getSupportFragmentManager().getFragment(savedInstanceState, "completedTaskFragment");
             specialTaskFragment = (SpecialTaskFragment)getSupportFragmentManager().getFragment(savedInstanceState, "specialTaskFragment");
         }
 
@@ -134,9 +135,9 @@ public class MainActivity extends AppCompatActivity implements AddTaskDialogList
      * A {@link FragmentPagerAdapter} that returns a fragment corresponding to
      * one of the sections/tabs/pages.
      */
-    public class SectionsPagerAdapter extends FragmentPagerAdapter {
+    private class SectionsPagerAdapter extends FragmentPagerAdapter {
 
-        public SectionsPagerAdapter(FragmentManager fragmentManager) {
+        SectionsPagerAdapter(FragmentManager fragmentManager) {
             super(fragmentManager);
         }
 
