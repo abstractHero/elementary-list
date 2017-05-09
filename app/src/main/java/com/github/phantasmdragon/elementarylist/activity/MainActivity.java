@@ -89,6 +89,7 @@ public class MainActivity extends AppCompatActivity implements AddTaskDialogList
 
         mViewPager = (ViewPager) findViewById(R.id.container);
         mViewPager.setAdapter(mSectionsPagerAdapter);
+        mViewPager.setCurrentItem(getCentralTab(mSectionsPagerAdapter.getCount()));
 
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(mViewPager);
@@ -100,6 +101,14 @@ public class MainActivity extends AppCompatActivity implements AddTaskDialogList
                 showAddDialog();
             }
         });
+    }
+
+    private int getCentralTab(int quantityTabs) {
+        int centralTab;
+        if (quantityTabs%2 != 0) centralTab = (quantityTabs-1)/2;
+        else centralTab = quantityTabs/2;
+
+        return centralTab;
     }
 
     @Override
