@@ -13,6 +13,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 
 import com.github.phantasmdragon.elementarylist.R;
 import com.github.phantasmdragon.elementarylist.activity.async.MoveAsyncTask;
@@ -36,6 +37,8 @@ public class MainActivity extends AppCompatActivity implements AddTaskDialogList
     private UnfulfilledTaskFragment unfulfilledTaskFragment;
     private CompletedTaskFragment completedTaskFragment;
     private SpecialTaskFragment specialTaskFragment;
+
+    private InputMethodManager mInputManager;
 
     @Override
     public void onDialogPositiveClick(DialogFragment dialog, Bundle infoAboutNewTask) {
@@ -82,6 +85,7 @@ public class MainActivity extends AppCompatActivity implements AddTaskDialogList
         setSupportActionBar(toolbar);
 
         mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
+        mInputManager = (InputMethodManager)getSystemService(INPUT_METHOD_SERVICE);
 
         mViewPager = (ViewPager) findViewById(R.id.container);
         mViewPager.setAdapter(mSectionsPagerAdapter);
@@ -96,7 +100,6 @@ public class MainActivity extends AppCompatActivity implements AddTaskDialogList
                 showAddDialog();
             }
         });
-
     }
 
     @Override
@@ -111,6 +114,7 @@ public class MainActivity extends AppCompatActivity implements AddTaskDialogList
         AddTaskDialogFragment dialog = new AddTaskDialogFragment();
         dialog.setCancelable(false);
         dialog.show(getSupportFragmentManager(), "addTask");
+        mInputManager.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
     }
 
     @Override
