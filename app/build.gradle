@@ -29,4 +29,5 @@ dependencies {
     testCompile 'junit:junit:4.12'
     compile 'org.jetbrains:annotations-java5:15.0'
     compile 'com.sackcentury:shinebutton:0.1.7'
+    compile "com.andkulikov:transitionseverywhere:1.7.2"
 }
