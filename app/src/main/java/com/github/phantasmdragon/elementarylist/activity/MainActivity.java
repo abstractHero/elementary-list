@@ -1,6 +1,7 @@
 package com.github.phantasmdragon.elementarylist.activity;
 
 import android.os.Bundle;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.DialogFragment;
@@ -17,6 +18,7 @@ import android.view.inputmethod.InputMethodManager;
 
 import com.github.phantasmdragon.elementarylist.R;
 import com.github.phantasmdragon.elementarylist.activity.async.MoveAsyncTask;
+import com.github.phantasmdragon.elementarylist.custom.behavior.floatingbutton.MovingUnderScreenBehavior;
 import com.github.phantasmdragon.elementarylist.fragment.AddTaskDialogFragment;
 import com.github.phantasmdragon.elementarylist.fragment.CompletedTaskFragment;
 import com.github.phantasmdragon.elementarylist.fragment.SpecialTaskFragment;
@@ -24,6 +26,8 @@ import com.github.phantasmdragon.elementarylist.fragment.UnfulfilledTaskFragment
 import com.github.phantasmdragon.elementarylist.fragment.listener.AddTaskDialogListener;
 import com.github.phantasmdragon.elementarylist.fragment.listener.OnCompletedClickListener;
 import com.github.phantasmdragon.elementarylist.fragment.listener.OnSpecialClickListener;
+
+import org.jetbrains.annotations.Contract;
 
 public class MainActivity extends AppCompatActivity implements AddTaskDialogListener,
                                                                OnCompletedClickListener,
@@ -95,6 +99,9 @@ public class MainActivity extends AppCompatActivity implements AddTaskDialogList
         tabLayout.setupWithViewPager(mViewPager);
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.button_float);
+        CoordinatorLayout.LayoutParams layoutParams = (CoordinatorLayout.LayoutParams)fab.getLayoutParams();
+        layoutParams.setBehavior(new MovingUnderScreenBehavior());
+        fab.setLayoutParams(layoutParams);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -103,6 +110,7 @@ public class MainActivity extends AppCompatActivity implements AddTaskDialogList
         });
     }
 
+    @Contract(pure = true)
     private int getCentralTab(int quantityTabs) {
         int centralTab;
         if (quantityTabs%2 != 0) centralTab = (quantityTabs-1)/2;
