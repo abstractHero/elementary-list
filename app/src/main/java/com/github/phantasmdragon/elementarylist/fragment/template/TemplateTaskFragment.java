@@ -5,7 +5,6 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -99,15 +98,6 @@ public class TemplateTaskFragment extends Fragment {
         taskRecycler = (RecyclerView)getActivity().findViewById(mRecyclerId);
         taskRecycler.setLayoutManager(new LinearLayoutManager(getActivity()));
         taskRecycler.setAdapter(rowAdapter);
-
-        final FloatingActionButton fab = ((FloatingActionButton)getActivity().findViewById(R.id.button_float));
-        taskRecycler.addOnScrollListener(new RecyclerView.OnScrollListener(){
-            @Override
-            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-                if (dy > 0) fab.hide();
-                else        fab.show();
-            }
-        });
     }
 
     protected void setDecoration() {
