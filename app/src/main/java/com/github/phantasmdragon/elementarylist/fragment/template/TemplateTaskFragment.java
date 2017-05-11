@@ -8,6 +8,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,6 +19,7 @@ import com.github.phantasmdragon.elementarylist.custom.itemdecoration.CrossedOut
 import com.github.phantasmdragon.elementarylist.custom.rowadapter.CustomRowAdapter;
 import com.github.phantasmdragon.elementarylist.fragment.CompletedTaskFragment;
 import com.github.phantasmdragon.elementarylist.fragment.UnfulfilledTaskFragment;
+import com.github.phantasmdragon.elementarylist.fragment.helper.callback.ItemTouchHelperCallback;
 
 import java.util.ArrayList;
 import java.util.TreeSet;
@@ -98,6 +100,10 @@ public class TemplateTaskFragment extends Fragment {
         taskRecycler = (RecyclerView)getActivity().findViewById(mRecyclerId);
         taskRecycler.setLayoutManager(new LinearLayoutManager(getActivity()));
         taskRecycler.setAdapter(rowAdapter);
+
+        ItemTouchHelper.Callback callback = new ItemTouchHelperCallback(rowAdapter);
+        ItemTouchHelper touchHelper = new ItemTouchHelper(callback);
+        touchHelper.attachToRecyclerView(taskRecycler);
     }
 
     protected void setDecoration() {
