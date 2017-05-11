@@ -1,5 +1,6 @@
 package com.github.phantasmdragon.elementarylist.custom.rowadapter;
 
+import android.animation.Animator;
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -23,6 +24,7 @@ import java.util.List;
 public class CustomRowAdapter extends RecyclerView.Adapter<CustomRowAdapter.ViewHolder> implements ItemTouchHelperAdapter {
 
     private final int CLICK_DELAY = 800;
+    private final int ALPHA_DURATION = 200;
 
     private OnCompletedClickListener mCompletedListener;
     private OnSpecialClickListener mSpecialListener;
@@ -50,13 +52,13 @@ public class CustomRowAdapter extends RecyclerView.Adapter<CustomRowAdapter.View
         return true;
     }
 
-    public static class ViewHolder extends RecyclerView.ViewHolder {
+    static class ViewHolder extends RecyclerView.ViewHolder {
 
-        public CheckBox mIsTaskCompleted;
-        public TextView mDescriptionTask;
-        public ShineButton mIsImportantTask;
+        CheckBox mIsTaskCompleted;
+        TextView mDescriptionTask;
+        ShineButton mIsImportantTask;
 
-        public ViewHolder(View itemView) {
+        ViewHolder(View itemView) {
             super(itemView);
             mIsTaskCompleted = (CheckBox)itemView.findViewById(R.id.check_box_item);
             mDescriptionTask = (TextView)itemView.findViewById(R.id.text_item);
@@ -87,7 +89,7 @@ public class CustomRowAdapter extends RecyclerView.Adapter<CustomRowAdapter.View
     }
 
     @Override
-    public void onBindViewHolder(CustomRowAdapter.ViewHolder holder, final int position) {
+    public void onBindViewHolder(final CustomRowAdapter.ViewHolder holder, int position) {
         String nameTask = mFragmentTasks.get(position);
 
         if (mNameFragment.equals(CompletedTaskFragment.NAME_THIS)) {
@@ -109,7 +111,31 @@ public class CustomRowAdapter extends RecyclerView.Adapter<CustomRowAdapter.View
             public void onClick(View v) {
                 if (System.currentTimeMillis() - mTimeLastClickOnComplete > CLICK_DELAY || mIsOneCom) {
                     mTimeLastClickOnComplete = System.currentTimeMillis();
-                    mCompletedListener.onTaskFinishClick(position, mNameFragment);
+                    holder.itemView.animate()
+                                   .setListener(new Animator.AnimatorListener() {
+                                        @Override
+                                        public void onAnimationStart(Animator animation) {
+
+                                        }
+
+                                        @Override
+                                        public void onAnimationEnd(Animator animation) {
+                                            mCompletedListener.onTaskFinishClick(holder.getAdapterPosition(), mNameFragment);
+                                        }
+
+                                        @Override
+                                        public void onAnimationCancel(Animator animation) {
+
+                                        }
+
+                                        @Override
+                                        public void onAnimationRepeat(Animator animation) {
+
+                                        }
+                                    })
+                                   .alpha(0.2f)
+                                   .setDuration(ALPHA_DURATION)
+                                   .start();
                     mIsOneCom = false;
                 }
             }
@@ -119,7 +145,31 @@ public class CustomRowAdapter extends RecyclerView.Adapter<CustomRowAdapter.View
             public void onClick(View v) {
                 if (System.currentTimeMillis() - mTimeLastClickOnImportant > CLICK_DELAY || mIsOneImp) {
                     mTimeLastClickOnImportant = System.currentTimeMillis();
-                    mSpecialListener.onTaskSpecialClick(position, mNameFragment);
+                    holder.itemView.animate()
+                                   .setListener(new Animator.AnimatorListener() {
+                                        @Override
+                                        public void onAnimationStart(Animator animation) {
+
+                                        }
+
+                                        @Override
+                                        public void onAnimationEnd(Animator animation) {
+                                            mSpecialListener.onTaskSpecialClick(holder.getAdapterPosition(), mNameFragment);
+                                        }
+
+                                        @Override
+                                        public void onAnimationCancel(Animator animation) {
+
+                                        }
+
+                                        @Override
+                                        public void onAnimationRepeat(Animator animation) {
+
+                                        }
+                                    })
+                                   .alpha(0.2f)
+                                   .setDuration(ALPHA_DURATION)
+                                   .start();
                     mIsOneImp = false;
                 }
             }
