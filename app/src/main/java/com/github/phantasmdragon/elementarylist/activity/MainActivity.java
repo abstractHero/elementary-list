@@ -64,7 +64,7 @@ public class MainActivity extends AppCompatActivity implements AddTaskDialogList
         if (nameFragment.equals(UnfulfilledTaskFragment.NAME_THIS)) {
             moveTask(unfulfilledTaskFragment, completedTaskFragment, position);
         } else if (nameFragment.equals(CompletedTaskFragment.NAME_THIS)) {
-            moveTask(completedTaskFragment, unfulfilledTaskFragment, position);
+            whitherMove(position);
         } else {
             moveTask(specialTaskFragment, completedTaskFragment, position);
         }
@@ -72,6 +72,14 @@ public class MainActivity extends AppCompatActivity implements AddTaskDialogList
 
     private void moveTask(Object fromWhich, Object whither, int currentPosition) {
         new MoveAsyncTask().execute(fromWhich, whither, currentPosition);
+    }
+
+    private void whitherMove(int position) {
+        if (completedTaskFragment.isSpecialTask(position)) {
+            moveTask(completedTaskFragment, specialTaskFragment, position);
+        } else {
+            moveTask(completedTaskFragment, unfulfilledTaskFragment, position);
+        }
     }
 
     @Override
