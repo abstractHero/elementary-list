@@ -26,6 +26,7 @@ import com.github.phantasmdragon.elementarylist.fragment.UnfulfilledTaskFragment
 import com.github.phantasmdragon.elementarylist.fragment.listener.AddTaskDialogListener;
 import com.github.phantasmdragon.elementarylist.fragment.listener.OnCompletedClickListener;
 import com.github.phantasmdragon.elementarylist.fragment.listener.OnSpecialClickListener;
+import com.github.phantasmdragon.elementarylist.fragment.template.TemplateTaskFragment;
 
 import org.jetbrains.annotations.Contract;
 
@@ -70,8 +71,8 @@ public class MainActivity extends AppCompatActivity implements AddTaskDialogList
         }
     }
 
-    private void moveTask(Object fromWhich, Object whither, int currentPosition) {
-        new MoveAsyncTask().execute(fromWhich, whither, currentPosition);
+    private <T extends TemplateTaskFragment, E extends TemplateTaskFragment> void moveTask(T fromWhich, E whither, int currentPosition) {
+        new MoveAsyncTask<>(fromWhich, whither).execute(currentPosition);
     }
 
     private void whitherMove(int position) {
