@@ -7,6 +7,7 @@ import com.github.phantasmdragon.elementarylist.fragment.template.TemplateTaskFr
 public class SpecialTaskFragment extends TemplateTaskFragment {
 
     public static final String NAME_THIS = SpecialTaskFragment.class.getSimpleName();
+    public static final String IS_SPECIAL = "special";
 
     private static final String NAME_LIST_ID = "specialId";
     private static final String NAME_LIST = "specialList";
@@ -25,5 +26,12 @@ public class SpecialTaskFragment extends TemplateTaskFragment {
         names.putString("nameListId", NAME_LIST_ID);
         names.putString("nameFragment", SpecialTaskFragment.NAME_THIS);
         return names;
+    }
+
+    @Override
+    public Bundle getInfoAboutTask(int position) {
+        Bundle info = super.getInfoAboutTask(position);
+        info.putBoolean(IS_SPECIAL, true);
+        return info;
     }
 }
