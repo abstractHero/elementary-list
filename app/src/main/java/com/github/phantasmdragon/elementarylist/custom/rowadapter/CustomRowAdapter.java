@@ -11,7 +11,6 @@ import android.widget.TextView;
 
 import com.github.phantasmdragon.elementarylist.R;
 import com.github.phantasmdragon.elementarylist.fragment.CompletedTaskFragment;
-import com.github.phantasmdragon.elementarylist.fragment.SpecialTaskFragment;
 import com.github.phantasmdragon.elementarylist.fragment.UnfulfilledTaskFragment;
 import com.github.phantasmdragon.elementarylist.fragment.helper.ItemTouchHelperAdapter;
 import com.github.phantasmdragon.elementarylist.fragment.listener.OnCompletedClickListener;
@@ -95,12 +94,17 @@ public class CustomRowAdapter extends RecyclerView.Adapter<CustomRowAdapter.View
         if (mNameFragment.equals(CompletedTaskFragment.NAME_THIS)) {
             holder.mIsTaskCompleted.setChecked(true);
             holder.mIsImportantTask.setEnabled(false);
-        }
-        if (mNameFragment.equals(UnfulfilledTaskFragment.NAME_THIS)) {
+            char lastChar = nameTask.charAt(nameTask.length() - 1);
+
+            if (lastChar == '1') holder.mIsImportantTask.setChecked(true);
+            else                 holder.mIsImportantTask.setChecked(false);
+
+            nameTask = nameTask.substring(0, nameTask.length()-1);
+
+        } else if (mNameFragment.equals(UnfulfilledTaskFragment.NAME_THIS)) {
             holder.mIsTaskCompleted.setChecked(false);
             holder.mIsImportantTask.setChecked(false);
-        }
-        if (mNameFragment.equals(SpecialTaskFragment.NAME_THIS)) {
+        } else {
             holder.mIsTaskCompleted.setChecked(false);
             holder.mIsImportantTask.setChecked(true);
         }
