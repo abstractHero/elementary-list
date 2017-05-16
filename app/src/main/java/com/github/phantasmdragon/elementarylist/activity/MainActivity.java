@@ -11,8 +11,6 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 
@@ -35,9 +33,6 @@ public class MainActivity extends AppCompatActivity implements AddTaskDialogList
                                                                OnSpecialClickListener {
 
     public static final String NAME_TASK = "task_name";
-
-    private SectionsPagerAdapter mSectionsPagerAdapter;
-    private ViewPager mViewPager;
 
     private UnfulfilledTaskFragment unfulfilledTaskFragment;
     private CompletedTaskFragment completedTaskFragment;
@@ -97,17 +92,10 @@ public class MainActivity extends AppCompatActivity implements AddTaskDialogList
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
+        SectionsPagerAdapter sectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
         mInputManager = (InputMethodManager)getSystemService(INPUT_METHOD_SERVICE);
 
-        mViewPager = (ViewPager) findViewById(R.id.container);
-        mViewPager.setAdapter(mSectionsPagerAdapter);
-        mViewPager.setCurrentItem(getCentralTab(mSectionsPagerAdapter.getCount()));
-
-        TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
-        tabLayout.setupWithViewPager(mViewPager);
-
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.button_float);
+        final FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.button_float);
         CoordinatorLayout.LayoutParams layoutParams = (CoordinatorLayout.LayoutParams)fab.getLayoutParams();
         layoutParams.setBehavior(new MovingUnderScreenBehavior());
         fab.setLayoutParams(layoutParams);
@@ -117,6 +105,34 @@ public class MainActivity extends AppCompatActivity implements AddTaskDialogList
                 showAddDialog();
             }
         });
+
+        ViewPager viewPager = (ViewPager) findViewById(R.id.container);
+        viewPager.setAdapter(sectionsPagerAdapter);
+        viewPager.setCurrentItem(getCentralTab(sectionsPagerAdapter.getCount()));
+        viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+            }
+
+            @Override
+            public void onPageSelected(int position) {
+                switch (position) {
+                    case 1:  fab.show();
+                        break;
+                    default: fab.hide();
+                        break;
+                }
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+
+            }
+        });
+
+        TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
+        tabLayout.setupWithViewPager(viewPager);
     }
 
     @Contract(pure = true)
@@ -143,28 +159,6 @@ public class MainActivity extends AppCompatActivity implements AddTaskDialogList
         mInputManager.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
-
-    /**
-     * A {@link FragmentPagerAdapter} that returns a fragment corresponding to
-     * one of the sections/tabs/pages.
-     */
     private class SectionsPagerAdapter extends FragmentPagerAdapter {
 
         SectionsPagerAdapter(FragmentManager fragmentManager) {
@@ -195,11 +189,11 @@ public class MainActivity extends AppCompatActivity implements AddTaskDialogList
         public CharSequence getPageTitle(int position) {
             switch (position) {
                 case 0:
-                    return "Finished";
+                    return getResources().getString(R.string.tab_finished);
                 case 1:
-                    return "Current";
+                    return getResources().getString(R.string.tab_current);
                 case 2:
-                    return "Special";
+                    return getResources().getString(R.string.tab_special);
             }
             return null;
         }
