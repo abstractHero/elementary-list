@@ -8,7 +8,7 @@ import android.view.animation.LinearInterpolator;
 
 public class MovingUnderScreenBehavior extends FloatingActionButton.Behavior {
 
-    private static final int ANIMATE_DURATION = 200;
+    private static final int ANIMATE_DURATION = 100;
 
     @Override
     public void onNestedScroll(CoordinatorLayout coordinatorLayout, FloatingActionButton child, View target, int dxConsumed, int dyConsumed, int dxUnconsumed, int dyUnconsumed) {
