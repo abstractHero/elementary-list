@@ -1,6 +1,7 @@
 package com.github.phantasmdragon.elementarylist.fragment.template;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -19,6 +20,7 @@ import com.github.phantasmdragon.elementarylist.custom.itemdecoration.CrossedOut
 import com.github.phantasmdragon.elementarylist.custom.rowadapter.CustomRowAdapter;
 import com.github.phantasmdragon.elementarylist.fragment.CompletedTaskFragment;
 import com.github.phantasmdragon.elementarylist.fragment.UnfulfilledTaskFragment;
+import com.github.phantasmdragon.elementarylist.fragment.async.service.SaveTaskService;
 import com.github.phantasmdragon.elementarylist.fragment.helper.callback.ItemTouchHelperCallback;
 
 import java.util.ArrayList;
@@ -41,6 +43,7 @@ public class TemplateTaskFragment extends Fragment {
 
     private int mLayout;
     private int mRecyclerId;
+    private boolean mTouched = false;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -92,7 +95,7 @@ public class TemplateTaskFragment extends Fragment {
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        if(savedInstanceState != null) {
+        if (savedInstanceState != null) {
             task = savedInstanceState.getStringArrayList(nameList);
             taskId = savedInstanceState.getStringArrayList(nameListId);
         }
@@ -113,6 +116,7 @@ public class TemplateTaskFragment extends Fragment {
     public void addTask(Bundle infoAboutNewTask) {
         taskId.add(0, new UUID(System.currentTimeMillis(), System.nanoTime()).toString());
         task.add(0, infoAboutNewTask.getString(MainActivity.NAME_TASK));
+        mTouched = true;
 
         saveTask(taskId.get(0), infoAboutNewTask);
     }
@@ -123,6 +127,7 @@ public class TemplateTaskFragment extends Fragment {
     }
 
     public void removeTask(int position) {
+        mTouched = true;
         removeTaskFromFile(getKey(position, taskId.get(position)));
         task.remove(position);
         taskId.remove(position);
@@ -148,7 +153,7 @@ public class TemplateTaskFragment extends Fragment {
     }
 
     @NonNull
-    private String getKey(int index, String id) {
+    public static String getKey(int index, String id) {
         return String.valueOf(index).concat("_" + id);
     }
 
@@ -173,15 +178,14 @@ public class TemplateTaskFragment extends Fragment {
     @Override
     public void onPause() {
         super.onPause();
-        SharedPreferences.Editor positionEditor = taskPreference.edit();
-        positionEditor.clear();
-        for (int i = 0; i < task.size(); i++) {
+        if (mTouched) {
+            mTouched = false;
 
-            String id = taskId.get(i),
-                   key = getKey(i, id);
-
-            positionEditor.putString(key, task.get(i));
+            Intent intent = new Intent(getContext(), SaveTaskService.class);
+            intent.putStringArrayListExtra("task", task);
+            intent.putStringArrayListExtra("taskId", taskId);
+            intent.putExtra("nameFile", nameFile);
+            getActivity().startService(intent);
         }
-        positionEditor.apply();
     }
 }
