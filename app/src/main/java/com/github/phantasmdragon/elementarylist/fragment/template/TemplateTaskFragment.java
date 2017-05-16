@@ -29,45 +29,44 @@ import java.util.UUID;
 
 public class TemplateTaskFragment extends Fragment {
 
-    private String nameList;
-    private String nameFile;
-    private String nameListId;
-    private String nameFragment;
+    private String mNameList;
+    private String mNameFile;
+    private String mNameListId;
+    private String mNameFragment;
 
-    private CustomRowAdapter rowAdapter;
-    private RecyclerView taskRecycler;
-    private SharedPreferences taskPreference;
+    private CustomRowAdapter mRowAdapter;
+    private RecyclerView mTaskRecycler;
+    private SharedPreferences mTaskPreference;
 
-    private ArrayList<String> task = new ArrayList<>();
-    private ArrayList<String> taskId = new ArrayList<>();
+    private ArrayList<String> mTask = new ArrayList<>();
+    private ArrayList<String> mTaskId = new ArrayList<>();
 
     private int mLayout;
     private int mRecyclerId;
-    private boolean mTouched = false;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setNames();
         setLayoutAndRecycler();
-        taskPreference = getActivity().getSharedPreferences(nameFile, Context.MODE_PRIVATE);
+        mTaskPreference = getActivity().getSharedPreferences(mNameFile, Context.MODE_PRIVATE);
         loadTask();
         setRetainInstance(true);
     }
 
     private void setNames() {
         Bundle names = getArguments();
-        nameList = names.getString("nameList");
-        nameFile = names.getString("nameFile");
-        nameListId = names.getString("nameListId");
-        nameFragment = names.getString("nameFragment");
+        mNameList = names.getString("mNameList");
+        mNameFile = names.getString("mNameFile");
+        mNameListId = names.getString("mNameListId");
+        mNameFragment = names.getString("mNameFragment");
     }
 
     private void setLayoutAndRecycler() {
-        if (nameFragment.equals(UnfulfilledTaskFragment.NAME_THIS)) {
+        if (mNameFragment.equals(UnfulfilledTaskFragment.NAME_THIS)) {
             mLayout = R.layout.fragment_current_task;
             mRecyclerId = R.id.recycler_current_task;
-        } else if (nameFragment.equals(CompletedTaskFragment.NAME_THIS)) {
+        } else if (mNameFragment.equals(CompletedTaskFragment.NAME_THIS)) {
             mLayout = R.layout.fragment_completed_task;
             mRecyclerId = R.id.recycler_completed_task;
         } else {
@@ -77,10 +76,10 @@ public class TemplateTaskFragment extends Fragment {
     }
 
     protected void loadTask() {
-        TreeSet<String> sortKeySet = new TreeSet<>(taskPreference.getAll().keySet());
+        TreeSet<String> sortKeySet = new TreeSet<>(mTaskPreference.getAll().keySet());
         for (String key: sortKeySet) {
-            task.add(taskPreference.getString(key, ""));
-            taskId.add(key.substring(key.indexOf("_")+1));
+            mTask.add(mTaskPreference.getString(key, ""));
+            mTaskId.add(key.substring(key.indexOf("_")+1));
         }
     }
 
@@ -88,7 +87,7 @@ public class TemplateTaskFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(mLayout, container, false);
-        rowAdapter = new CustomRowAdapter(view.getContext(), task, nameFragment);
+        mRowAdapter = new CustomRowAdapter(view.getContext(), mTask, mNameFragment);
         return view;
     }
 
@@ -96,57 +95,55 @@ public class TemplateTaskFragment extends Fragment {
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         if (savedInstanceState != null) {
-            task = savedInstanceState.getStringArrayList(nameList);
-            taskId = savedInstanceState.getStringArrayList(nameListId);
+            mTask = savedInstanceState.getStringArrayList(mNameList);
+            mTaskId = savedInstanceState.getStringArrayList(mNameListId);
         }
 
-        taskRecycler = (RecyclerView)getActivity().findViewById(mRecyclerId);
-        taskRecycler.setLayoutManager(new LinearLayoutManager(getActivity()));
-        taskRecycler.setAdapter(rowAdapter);
+        mTaskRecycler = (RecyclerView)getActivity().findViewById(mRecyclerId);
+        mTaskRecycler.setLayoutManager(new LinearLayoutManager(getActivity()));
+        mTaskRecycler.setAdapter(mRowAdapter);
 
-        ItemTouchHelper.Callback callback = new ItemTouchHelperCallback(rowAdapter);
+        ItemTouchHelper.Callback callback = new ItemTouchHelperCallback(mRowAdapter);
         ItemTouchHelper touchHelper = new ItemTouchHelper(callback);
-        touchHelper.attachToRecyclerView(taskRecycler);
+        touchHelper.attachToRecyclerView(mTaskRecycler);
     }
 
     protected void setDecoration() {
-        taskRecycler.addItemDecoration(new CrossedOutItemDecoration(getContext()));
+        mTaskRecycler.addItemDecoration(new CrossedOutItemDecoration(getContext()));
     }
 
     public void addTask(Bundle infoAboutNewTask) {
-        taskId.add(0, new UUID(System.currentTimeMillis(), System.nanoTime()).toString());
-        task.add(0, infoAboutNewTask.getString(MainActivity.NAME_TASK));
-        mTouched = true;
+        mTaskId.add(0, new UUID(System.currentTimeMillis(), System.nanoTime()).toString());
+        mTask.add(0, infoAboutNewTask.getString(MainActivity.NAME_TASK));
 
-        saveTask(taskId.get(0), infoAboutNewTask);
+        saveTask(mTaskId.get(0), infoAboutNewTask);
     }
 
     public void updatingAdapterAfterAdd() {
-        rowAdapter.notifyItemRangeChanged(0, task.size());
-        taskRecycler.scrollToPosition(0); //TODO: Run is scroll depending on the settings
+        mRowAdapter.notifyItemRangeChanged(0, mTask.size());
+        mTaskRecycler.scrollToPosition(0);
     }
 
     public void removeTask(int position) {
-        mTouched = true;
-        removeTaskFromFile(getKey(position, taskId.get(position)));
-        task.remove(position);
-        taskId.remove(position);
+        removeTaskFromFile(getKey(position, mTaskId.get(position)));
+        mTask.remove(position);
+        mTaskId.remove(position);
     }
 
     public void updatingAdapterAfterRemove(int position) {
-        rowAdapter.notifyItemRemoved(position);
-        rowAdapter.notifyItemRangeChanged(0, task.size());
+        mRowAdapter.notifyItemRemoved(position);
+        mRowAdapter.notifyItemRangeChanged(0, mTask.size());
     }
 
     private void saveTask(String taskId, Bundle taskInfo) {
-        SharedPreferences.Editor saveEditor = taskPreference.edit();
+        SharedPreferences.Editor saveEditor = mTaskPreference.edit();
         saveEditor.putString(taskId, taskInfo.getString(MainActivity.NAME_TASK))
                   .apply();
     }
 
     private void removeTaskFromFile(String taskId) {
-        SharedPreferences.Editor deleteEditor = taskPreference.edit();
-        if (taskPreference.contains(taskId)) deleteEditor.remove(taskId)
+        SharedPreferences.Editor deleteEditor = mTaskPreference.edit();
+        if (mTaskPreference.contains(taskId)) deleteEditor.remove(taskId)
                                                          .apply();
         else deleteEditor.remove(getKeyWithoutPrefix(taskId))
                          .apply();
@@ -164,28 +161,24 @@ public class TemplateTaskFragment extends Fragment {
 
     public Bundle getInfoAboutTask(int position) {
         Bundle infoAboutTask = new Bundle();
-        infoAboutTask.putString(MainActivity.NAME_TASK, task.get(position));
+        infoAboutTask.putString(MainActivity.NAME_TASK, mTask.get(position));
         return infoAboutTask;
     }
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putStringArrayList(nameList, task);
-        outState.putStringArrayList(nameListId, taskId);
+        outState.putStringArrayList(mNameList, mTask);
+        outState.putStringArrayList(mNameListId, mTaskId);
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        if (mTouched) {
-            mTouched = false;
-
-            Intent intent = new Intent(getContext(), SaveTaskService.class);
-            intent.putStringArrayListExtra("task", task);
-            intent.putStringArrayListExtra("taskId", taskId);
-            intent.putExtra("nameFile", nameFile);
-            getActivity().startService(intent);
-        }
+        Intent intent = new Intent(getContext(), SaveTaskService.class);
+        intent.putStringArrayListExtra("mTask", mTask);
+        intent.putStringArrayListExtra("mTaskId", mTaskId);
+        intent.putExtra("mNameFile", mNameFile);
+        getActivity().startService(intent);
     }
 }
