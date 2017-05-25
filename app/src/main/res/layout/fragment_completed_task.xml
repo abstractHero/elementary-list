@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/fragment_completed"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:id="@+id/fragment_completed"
     tools:context="com.github.phantasmdragon.elementarylist.fragment.CompletedTaskFragment">
 
     <android.support.v7.widget.RecyclerView
