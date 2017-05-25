@@ -4,7 +4,7 @@ This is simple todo list, which use RecyclerView. The application consists of th
 P.S. This is my first Android application
 
 # Demonstration
-![Demo](https://cloud.githubusercontent.com/assets/20317931/26457562/566a8ae8-4179-11e7-9e81-8388e5251920.gif)
+![Demo](https://cloud.githubusercontent.com/assets/20317931/26457975/a3ac3616-417a-11e7-8807-38b388ea4152.gif)
 
 # Links
 The image of the star is taken from <a href="http://www.freepik.com/free-vector/social-media-flat-icon-set_841697.htm">here</a>
