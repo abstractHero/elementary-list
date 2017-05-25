@@ -1,6 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#3F51B5</color>
-    <color name="colorPrimaryDark">#303F9F</color>
-    <color name="colorAccent">#FF4081</color>
+    <color name="colorPrimary">#ACDBC9</color>
+    <color name="colorPrimaryDark">#83AE9B</color>
+    <color name="colorAccent">#F67280</color>
+    <color name="backgroundRow">#66FFFFFF</color>
+    <color name="crossedOutRow">#5A5D50</color>
+    <color name="clickedStar">#ECE473</color>
+    <color name="unclikedStar">#ACD4DDB0</color>
+    <color name="penOnFab">#355C7D</color>
+    <color name="appIconPen">#0A1D2A</color>
+    <color name="appIconBackground">#82C8B7</color>
 </resources>
