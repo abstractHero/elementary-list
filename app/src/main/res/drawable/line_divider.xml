@@ -6,6 +6,6 @@
         android:width="1dp"
         android:height="2dp" />
 
-    <solid android:color="@color/colorAccent" />
+    <solid android:color="@color/crossedOutRow" />
 
 </shape>
