@@ -56,10 +56,10 @@ public class TemplateTaskFragment extends Fragment {
 
     private void setNames() {
         Bundle names = getArguments();
-        mNameList = names.getString("mNameList");
-        mNameFile = names.getString("mNameFile");
-        mNameListId = names.getString("mNameListId");
-        mNameFragment = names.getString("mNameFragment");
+        mNameList = names.getString("nameList");
+        mNameFile = names.getString("nameFile");
+        mNameListId = names.getString("nameListId");
+        mNameFragment = names.getString("nameFragment");
     }
 
     private void setLayoutAndRecycler() {
@@ -176,9 +176,9 @@ public class TemplateTaskFragment extends Fragment {
     public void onPause() {
         super.onPause();
         Intent intent = new Intent(getContext(), SaveTaskService.class);
-        intent.putStringArrayListExtra("mTask", mTask);
-        intent.putStringArrayListExtra("mTaskId", mTaskId);
-        intent.putExtra("mNameFile", mNameFile);
+        intent.putStringArrayListExtra("task", mTask);
+        intent.putStringArrayListExtra("taskId", mTaskId);
+        intent.putExtra("nameFile", mNameFile);
         getActivity().startService(intent);
     }
 }
