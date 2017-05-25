@@ -4,6 +4,7 @@ android {
     compileSdkVersion 25
     buildToolsVersion "25.0.2"
     defaultConfig {
+        vectorDrawables.useSupportLibrary = true
         applicationId "com.github.phantasmdragon.elementarylist"
         minSdkVersion 17
         targetSdkVersion 25
