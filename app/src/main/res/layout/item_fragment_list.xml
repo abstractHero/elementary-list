@@ -2,33 +2,44 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="horizontal"
-    android:layout_marginTop="@dimen/item_fragment_vertical_margin"
-    android:layout_marginBottom="@dimen/item_fragment_vertical_margin"
-    android:layout_marginLeft="@dimen/item_fragment_vertical_margin"
-    android:layout_marginRight="@dimen/item_fragment_vertical_margin"
+    android:layout_marginTop="@dimen/item_fragment_margin"
+    android:layout_marginBottom="@dimen/item_fragment_margin"
+    android:layout_marginLeft="@dimen/item_fragment_margin"
+    android:layout_marginRight="@dimen/item_fragment_margin"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
     <CheckBox
         android:id="@+id/check_box_item"
+        android:layout_marginTop="@dimen/item_fragment_element_margin"
+        android:layout_marginBottom="@dimen/item_fragment_element_margin"
+        android:layout_marginLeft="@dimen/item_fragment_element_margin"
+        android:layout_marginRight="@dimen/item_fragment_element_margin"
         android:layout_width="32dp"
         android:layout_height="32dp" />
 
     <TextView
         android:id="@+id/text_item"
+        android:layout_marginTop="@dimen/item_fragment_element_margin"
+        android:layout_marginBottom="@dimen/item_fragment_element_margin"
         android:layout_width="0dp"
         android:layout_height="32dp"
         android:layout_weight="8"
-        android:textSize="18sp"/>
+        android:textSize="19sp"/>
 
     <com.sackcentury.shinebuttonlib.ShineButton
         android:id="@+id/button_item"
+        android:layout_marginTop="@dimen/item_fragment_element_margin"
+        android:layout_marginBottom="@dimen/item_fragment_element_margin"
+        android:layout_marginLeft="@dimen/item_fragment_element_margin"
+        android:layout_marginRight="@dimen/item_fragment_element_margin"
         android:layout_width="32dp"
         android:layout_height="32dp"
-        android:src="@android:color/darker_gray"
-        app:btn_color="@android:color/darker_gray"
-        app:btn_fill_color="@android:color/holo_green_dark"
-        app:allow_random_color="false"
+        android:src="@color/unclikedStar"
+        app:click_animation_duration="200"
+        app:btn_color="@color/unclikedStar"
+        app:btn_fill_color="@color/clickedStar"
+        app:allow_random_color="true"
         app:siShape="@raw/star"/>
 
 </LinearLayout>
